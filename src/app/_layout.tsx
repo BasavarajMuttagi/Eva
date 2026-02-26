@@ -8,7 +8,6 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useColorScheme } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-
 import { EvaDarkTheme, EvaLightTheme } from "../theme/navigationTheme";
 
 import "../../global.css";

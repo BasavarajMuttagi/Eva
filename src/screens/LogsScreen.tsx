@@ -1,7 +1,13 @@
-import Icon, { Phosphor } from "@/src/utils/icons";
+import Icon, { Phosphor } from "@/src/components/Icon";
 import { useNavigation, useRouter } from "expo-router";
 import React, { useLayoutEffect } from "react";
-import { FlatList, Pressable, Text, View } from "react-native";
+import {
+  FlatList,
+  Pressable,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 type LogDay = {
   id: string;
@@ -32,16 +38,8 @@ export default function LogsScreen() {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerTitle: () => (
-        <Text
-          style={{ fontFamily: "LibreBaskerville_700Bold" }}
-          className="text-3xl text-text-primary-light dark:text-text-primary-dark"
-        >
-          Logs
-        </Text>
-      ),
       headerRight: () => (
-        <Pressable
+        <TouchableOpacity
           onPress={() => router.push("/search")}
           className="bg-chip-light dark:bg-chip-dark p-2 rounded-full"
         >
@@ -53,7 +51,7 @@ export default function LogsScreen() {
               className="text-text-primary-light dark:text-text-primary-dark"
             />
           </View>
-        </Pressable>
+        </TouchableOpacity>
       ),
       headerRightContainerStyle: { paddingRight: 14 },
     });

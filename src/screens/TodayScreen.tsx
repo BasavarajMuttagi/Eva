@@ -1,8 +1,7 @@
 // app/(swipe)/index.tsx
 
-import Icon, { Phosphor } from "@/src/utils/icons";
-import { useNavigation, useRouter } from "expo-router";
-import React, { useLayoutEffect, useState } from "react";
+import Icon, { Phosphor } from "@/src/components/Icon";
+import React, { useState } from "react";
 import { FlatList, Pressable, Text, View } from "react-native";
 
 type Entry = {
@@ -13,23 +12,6 @@ type Entry = {
 };
 
 export default function TodayScreen() {
-  const navigation = useNavigation();
-  const router = useRouter();
-
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerTitle: () => (
-        <Text
-          style={{ fontFamily: "LibreBaskerville_700Bold" }}
-          className="text-3xl text-text-primary-light dark:text-text-primary-dark"
-        >
-          Today
-        </Text>
-      ),
-      headerRightContainerStyle: { paddingRight: 14 },
-    });
-  }, [navigation, router]);
-
   const [entries] = useState<Entry[]>([
     { id: "1", text: "Filter coffee", calories: 90, state: "ready" },
     { id: "2", text: "Masala dosa with chutney", state: "processing" },

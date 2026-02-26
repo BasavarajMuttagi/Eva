@@ -1,25 +1,7 @@
-import { useNavigation, useRouter } from "expo-router";
-import React, { useLayoutEffect } from "react";
+import React from "react";
 import { Pressable, Text, View } from "react-native";
 
 export default function SettingsScreen() {
-  const navigation = useNavigation();
-  const router = useRouter();
-
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerLeftContainerStyle: { paddingLeft: 14 },
-      headerTitle: () => (
-        <Text
-          style={{ fontFamily: "LibreBaskerville_700Bold" }}
-          className="text-3xl text-text-primary-light dark:text-text-primary-dark"
-        >
-          Settings
-        </Text>
-      ),
-    });
-  }, [navigation, router]);
-
   return (
     <View className="flex-1 bg-screen-light dark:bg-screen-dark px-5">
       <View className="gap-6 mt-10">

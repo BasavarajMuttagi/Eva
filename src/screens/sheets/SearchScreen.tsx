@@ -1,4 +1,4 @@
-import Icon, { Phosphor } from "@/src/utils/icons";
+import Icon, { Phosphor } from "@/src/components/Icon";
 import { useNavigation, useRouter } from "expo-router";
 import { useLayoutEffect, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
@@ -13,7 +13,7 @@ export default function SearchScreen() {
     navigation.setOptions({
       headerLeft: () => (
         <Pressable
-          onPress={() => router.back()}
+          onPress={() => router.dismiss()}
           className="bg-chip-light dark:bg-chip-dark p-2 rounded-full"
         >
           <View pointerEvents="none">

@@ -1,5 +1,6 @@
+import HeaderTitle from "@/src/components/HeaderTitle";
+import Icon, { Phosphor } from "@/src/components/Icon";
 import { Tabs } from "expo-router";
-import { CalendarIcon, FileTextIcon, GearIcon } from "phosphor-react-native";
 
 export default function TabLayout() {
   return (
@@ -8,6 +9,7 @@ export default function TabLayout() {
       screenOptions={{
         headerShadowVisible: false,
         animation: "shift",
+        headerTitle: ({ children }) => <HeaderTitle title={children} />,
       }}
     >
       <Tabs.Screen
@@ -15,27 +17,35 @@ export default function TabLayout() {
         options={{
           title: "Today",
           tabBarIcon: ({ color }) => (
-            <CalendarIcon size={24} color={color} weight="fill" />
+            <Icon
+              icon={Phosphor.CalendarIcon}
+              size={24}
+              color={color}
+              weight="fill"
+            />
           ),
         }}
       />
-
       <Tabs.Screen
         name="logs"
         options={{
           title: "Logs",
           tabBarIcon: ({ color }) => (
-            <FileTextIcon size={24} color={color} weight="fill" />
+            <Icon
+              icon={Phosphor.FileTextIcon}
+              size={24}
+              color={color}
+              weight="fill"
+            />
           ),
         }}
       />
-
       <Tabs.Screen
         name="settings"
         options={{
           title: "Settings",
           tabBarIcon: ({ color }) => (
-            <GearIcon size={24} color={color} weight="fill" />
+            <Icon icon={Phosphor.Gear} size={24} color={color} weight="fill" />
           ),
         }}
       />
