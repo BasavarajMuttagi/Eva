@@ -1,5 +1,6 @@
 import React from "react";
 import { Pressable, Text, View } from "react-native";
+import { SignOutButton } from "../components/SignOutButton";
 
 export default function SettingsScreen() {
   return (
@@ -40,6 +41,7 @@ export default function SettingsScreen() {
             Version, credits, support
           </Text>
         </Pressable>
+        <SignOutButton />
       </View>
     </View>
   );

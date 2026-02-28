@@ -1,11 +1,14 @@
 import HeaderTitle from "@/src/components/HeaderTitle";
 import Icon, { Phosphor } from "@/src/components/Icon";
 import { Tabs } from "expo-router";
+import { useEffect } from "react";
 
 export default function TabLayout() {
+  useEffect(() => {
+    console.log("tablayout reached!");
+  }, []);
   return (
     <Tabs
-      initialRouteName="index"
       screenOptions={{
         headerShadowVisible: false,
         animation: "shift",
@@ -13,7 +16,7 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="today"
         options={{
           title: "Today",
           tabBarIcon: ({ color }) => (
@@ -45,7 +48,12 @@ export default function TabLayout() {
         options={{
           title: "Settings",
           tabBarIcon: ({ color }) => (
-            <Icon icon={Phosphor.Gear} size={24} color={color} weight="fill" />
+            <Icon
+              icon={Phosphor.GearIcon}
+              size={24}
+              color={color}
+              weight="fill"
+            />
           ),
         }}
       />
