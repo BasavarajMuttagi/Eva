@@ -1,5 +1,9 @@
 import Icon, { Phosphor } from "@/src/components/Icon";
-import React, { useEffect, useRef, useState } from "react";
+import { db } from "@/src/db";
+import { foodLogs } from "@/src/db/schema";
+import { desc, eq } from "drizzle-orm";
+import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import React, { useRef, useState } from "react";
 import {
   Alert,
   FlatList,
@@ -16,12 +20,10 @@ import Swipeable, {
 import "react-native-get-random-values";
 import { SharedValue } from "react-native-reanimated";
 import { v4 as uuidv4 } from "uuid";
-import { apiClient } from "../lib/apiClient";
 
 type FoodLogItem = {
   id: string;
   logId: string;
-  userId: string;
   foodName: string;
   quantityDescription: string;
   quantityTotal: number;
@@ -30,19 +32,19 @@ type FoodLogItem = {
   carbsPer100: number;
   proteinPer100: number;
   fatPer100: number;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 type FoodLog = {
   id: string;
-  userId: string;
   rawText: string;
   state: "pending" | "processing" | "done" | "error";
   errorMessage: string | null;
   version: number;
-  createdAt: string;
-  updatedAt: string;
+  syncedAt: number | null;
+  createdAt: Date;
+  updatedAt: Date;
   items: FoodLogItem[];
 };
 
@@ -61,10 +63,9 @@ function RightActions({
 }) {
   return (
     <View className="w-[180px] flex-row items-center pl-2 pr-1 gap-2">
-      {/* Edit */}
       <TouchableOpacity
         onPress={() => onEdit(item)}
-        className="flex-1 h-full bg-blue-500  justify-center items-center gap-1 rounded-md"
+        className="flex-1 h-full bg-blue-500 justify-center items-center gap-1 rounded-md"
       >
         <Icon
           icon={Phosphor.PencilSimpleLineIcon}
@@ -74,11 +75,10 @@ function RightActions({
         />
       </TouchableOpacity>
 
-      {/* Delete */}
       <TouchableOpacity
         onPress={() => onDelete(item.id)}
         disabled={deletingId === item.id}
-        className="flex-1 h-full bg-red-500  justify-center items-center gap-1 rounded-md"
+        className="flex-1 h-full bg-red-500 justify-center items-center gap-1 rounded-md"
       >
         {deletingId === item.id ? (
           <Icon
@@ -145,23 +145,15 @@ function SwipeableRow({
 }
 
 export default function TodayScreen() {
-  const [logs, setLogs] = useState<FoodLog[]>([]);
+  const { data: logs = [] } = useLiveQuery(
+    db.query.foodLogs.findMany({
+      orderBy: desc(foodLogs.createdAt),
+      with: { items: true },
+    }),
+  );
+
   const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-
-  const loadLogs = async () => {
-    try {
-      const res = await apiClient.get<FoodLog[]>("/api/logs");
-      setLogs(res.data);
-    } catch {
-      console.warn("Failed to load logs");
-    }
-  };
-
-  useEffect(() => {
-    loadLogs();
-  }, []);
 
   const totalCalories = (log: FoodLog) => {
     if (!log.items || log.items.length === 0) return undefined;
@@ -171,7 +163,26 @@ export default function TodayScreen() {
     );
   };
 
-  const handleDelete = async (logId: string, close?: () => void) => {
+  const addLog = async () => {
+    if (!input.trim()) return;
+
+    const id = uuidv4();
+    const now = new Date();
+
+    await db.insert(foodLogs).values({
+      id,
+      rawText: input.trim(),
+      state: "pending",
+      version: 1,
+      syncedAt: null,
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    setInput("");
+  };
+
+  const handleDelete = (logId: string, close?: () => void) => {
     close?.();
     Alert.alert("Delete Log", "Remove this food entry? This can't be undone.", [
       {
@@ -185,8 +196,7 @@ export default function TodayScreen() {
         onPress: async () => {
           setDeletingId(logId);
           try {
-            await apiClient.delete(`/api/log/${logId}`);
-            setLogs((prev) => prev.filter((log) => log.id !== logId));
+            await db.delete(foodLogs).where(eq(foodLogs.id, logId));
           } catch (error) {
             console.error("Delete failed:", error);
             Alert.alert("Error", "Failed to delete log. Try again.");
@@ -201,49 +211,7 @@ export default function TodayScreen() {
   const handleEdit = (log: FoodLog, close?: () => void) => {
     close?.();
     setInput(log.rawText);
-    handleDelete(log.id);
-  };
-
-  const addLog = async () => {
-    if (!input.trim() || loading) return;
-
-    const id = uuidv4();
-    const now = Date.now();
-
-    const optimistic: FoodLog = {
-      id,
-      userId: "",
-      rawText: input,
-      state: "pending",
-      errorMessage: null,
-      version: 1,
-      createdAt: new Date(now).toISOString(),
-      updatedAt: new Date(now).toISOString(),
-      items: [],
-    };
-
-    setLogs((prev) => [optimistic, ...prev]);
-    setInput("");
-    setLoading(true);
-
-    try {
-      await apiClient.post("/api/log", {
-        id,
-        rawText: optimistic.rawText,
-        createdAt: now,
-        updatedAt: now,
-        version: 1,
-      });
-      await loadLogs();
-    } catch {
-      setLogs((prev) =>
-        prev.map((l) =>
-          l.id === id ? { ...l, state: "error", errorMessage: "Try again" } : l,
-        ),
-      );
-    } finally {
-      setLoading(false);
-    }
+    db.delete(foodLogs).where(eq(foodLogs.id, log.id));
   };
 
   const renderRight = (log: FoodLog) => {
@@ -256,8 +224,8 @@ export default function TodayScreen() {
             weight="fill"
             className="text-accent-light dark:text-accent-dark"
           />
-          <Text className="text-text-secondary-light dark:text-text-secondary-dark">
-            Thinking
+          <Text className="text-text-secondary-light dark:text-text-secondary-dark capitalize">
+            {log.state}
           </Text>
         </View>
       );
@@ -265,9 +233,17 @@ export default function TodayScreen() {
 
     if (log.state === "error") {
       return (
-        <Text className="text-text-secondary-light dark:text-text-secondary-dark">
-          {log.errorMessage ?? "Try again"}
-        </Text>
+        <View className="flex-row items-center gap-1">
+          <Icon
+            icon={Phosphor.WarningCircleIcon}
+            size={14}
+            weight="fill"
+            className="text-red-500"
+          />
+          <Text className="text-red-500 capitalize">
+            {log.errorMessage ?? "Error"}
+          </Text>
+        </View>
       );
     }
 
@@ -281,7 +257,7 @@ export default function TodayScreen() {
           className="text-accent-light dark:text-accent-dark"
         />
         <Text className="text-text-secondary-light dark:text-text-secondary-dark">
-          {kcal ? Math.round(kcal) + " kcal" : ""}
+          {kcal ? Math.round(kcal) + " kcal" : "—"}
         </Text>
       </View>
     );
@@ -312,17 +288,14 @@ export default function TodayScreen() {
           />
           <TouchableOpacity
             onPress={addLog}
-            disabled={loading}
             className="bg-accent-light dark:bg-accent-dark px-4 py-2 rounded-full"
           >
-            <Text className="text-white text-sm">
-              {loading ? "..." : "Add"}
-            </Text>
+            <Text className="text-white text-sm">Add</Text>
           </TouchableOpacity>
         </View>
 
         <FlatList
-          data={logs}
+          data={logs as FoodLog[]}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
           contentContainerStyle={{ paddingBottom: 40 }}

@@ -1,12 +1,10 @@
 import HeaderTitle from "@/src/components/HeaderTitle";
 import Icon, { Phosphor } from "@/src/components/Icon";
+import { useSyncEngine } from "@/src/lib/useSyncEngine";
 import { Tabs } from "expo-router";
-import { useEffect } from "react";
 
 export default function TabLayout() {
-  useEffect(() => {
-    console.log("tablayout reached!");
-  }, []);
+  useSyncEngine();
   return (
     <Tabs
       screenOptions={{

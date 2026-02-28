@@ -9,6 +9,7 @@ import { StatusBar } from "expo-status-bar";
 import { ActivityIndicator, useColorScheme, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import "../../global.css";
+import { DbMigrations } from "../components/DbMigrations";
 import { authClient } from "../lib/auth-client";
 import { EvaDarkTheme, EvaLightTheme } from "../theme/navigationTheme";
 function RootNavigator() {
@@ -59,7 +60,9 @@ export default function RootLayout() {
     <ThemeProvider value={isDark ? EvaDarkTheme : EvaLightTheme}>
       <SafeAreaProvider>
         <StatusBar style={isDark ? "light" : "dark"} />
-        <RootNavigator />
+        <DbMigrations>
+          <RootNavigator />
+        </DbMigrations>
       </SafeAreaProvider>
     </ThemeProvider>
   );
