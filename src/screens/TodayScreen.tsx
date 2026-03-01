@@ -1,8 +1,10 @@
 import Icon, { Phosphor } from "@/src/components/Icon";
 import { db } from "@/src/db";
 import { foodLogs } from "@/src/db/schema";
+import { fetchAndSyncFromServer } from "@/src/lib/sync";
 import { desc, eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { useRouter } from "expo-router";
 import React, { useRef, useState } from "react";
 import {
   Alert,
@@ -145,6 +147,7 @@ function SwipeableRow({
 }
 
 export default function TodayScreen() {
+  const router = useRouter();
   const { data: logs = [] } = useLiveQuery(
     db.query.foodLogs.findMany({
       orderBy: desc(foodLogs.createdAt),
@@ -154,6 +157,7 @@ export default function TodayScreen() {
 
   const [input, setInput] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   const totalCalories = (log: FoodLog) => {
     if (!log.items || log.items.length === 0) return undefined;
@@ -161,6 +165,12 @@ export default function TodayScreen() {
       (sum, item) => sum + (item.caloriesPer100 / 100) * item.quantityTotal,
       0,
     );
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchAndSyncFromServer();
+    setRefreshing(false);
   };
 
   const addLog = async () => {
@@ -210,8 +220,14 @@ export default function TodayScreen() {
 
   const handleEdit = (log: FoodLog, close?: () => void) => {
     close?.();
-    setInput(log.rawText);
-    db.delete(foodLogs).where(eq(foodLogs.id, log.id));
+    router.push({
+      pathname: "/(sheets)/edit-log",
+      params: {
+        id: log.id,
+        rawText: log.rawText,
+        version: String(log.version),
+      },
+    });
   };
 
   const renderRight = (log: FoodLog) => {
@@ -286,12 +302,26 @@ export default function TodayScreen() {
             onSubmitEditing={addLog}
             returnKeyType="done"
           />
-          <TouchableOpacity
-            onPress={addLog}
-            className="bg-accent-light dark:bg-accent-dark px-4 py-2 rounded-full"
-          >
-            <Text className="text-white text-sm">Add</Text>
-          </TouchableOpacity>
+          <View className="flex-row items-center gap-2">
+            <TouchableOpacity
+              onPress={handleRefresh}
+              disabled={refreshing}
+              className="p-2 rounded-full border border-border-light dark:border-border-dark"
+            >
+              <Icon
+                icon={Phosphor.ArrowsClockwiseIcon}
+                size={18}
+                weight="bold"
+                className={`text-text-primary-light dark:text-text-primary-dark ${refreshing ? "opacity-40" : ""}`}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={addLog}
+              className="bg-accent-light dark:bg-accent-dark px-4 py-2 rounded-full"
+            >
+              <Text className="text-white text-sm">Add</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         <FlatList

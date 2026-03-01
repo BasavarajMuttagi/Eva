@@ -12,6 +12,16 @@ export default function SheetLayout() {
           headerShadowVisible: false,
         }}
       />
+      <Stack.Screen
+        name="edit-log"
+        options={{
+          headerTitle: "Edit Log",
+          animation: "slide_from_bottom",
+          headerShadowVisible: false,
+          sheetAllowedDetents: [0.5],
+          sheetGrabberVisible: true,
+        }}
+      />
     </Stack>
   );
 }

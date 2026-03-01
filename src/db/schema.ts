@@ -7,7 +7,7 @@ import {
   text,
 } from "drizzle-orm/sqlite-core";
 
-export const SEX_VALUES = ["male", "female", "other"] as const;
+export const GENDER_VALUES = ["male", "female", "other"] as const;
 export const ACTIVITY_VALUES = [
   "sedentary",
   "light",
@@ -24,11 +24,11 @@ export const LOG_STATE_VALUES = [
 export const UNIT_VALUES = ["g", "ml"] as const;
 
 export const userPreferences = sqliteTable("user_preferences", {
-  id: integer("id").primaryKey({ autoIncrement: true }), // single row, no userId
+  id: integer("id").primaryKey({ autoIncrement: true }),
   heightCm: integer("height_cm").notNull(),
   weightKg: real("weight_kg").notNull(),
   age: integer("age").notNull(),
-  sex: text("sex", { enum: SEX_VALUES }).notNull(),
+  gender: text("gender", { enum: GENDER_VALUES }).notNull(),
   activityLevel: text("activity_level", { enum: ACTIVITY_VALUES }).notNull(),
   waterTrackingEnabled: integer("water_tracking_enabled", { mode: "boolean" })
     .default(false)
@@ -36,7 +36,7 @@ export const userPreferences = sqliteTable("user_preferences", {
   sleepTrackingEnabled: integer("sleep_tracking_enabled", { mode: "boolean" })
     .default(false)
     .notNull(),
-  syncedAt: integer("synced_at", { mode: "timestamp_ms" }), // null = needs push
+  syncedAt: integer("synced_at", { mode: "timestamp_ms" }),
   createdAt: integer("created_at", { mode: "timestamp_ms" })
     .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
     .notNull(),
@@ -48,9 +48,9 @@ export const userPreferences = sqliteTable("user_preferences", {
 export const weightLogs = sqliteTable(
   "weight_logs",
   {
-    id: text("id").primaryKey(), // client UUID, same id pushed to server
+    id: text("id").primaryKey(),
     weightKg: real("weight_kg").notNull(),
-    syncedAt: integer("synced_at", { mode: "timestamp_ms" }), // null = needs push
+    syncedAt: integer("synced_at", { mode: "timestamp_ms" }),
     createdAt: integer("created_at", { mode: "timestamp_ms" })
       .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
       .notNull(),
@@ -64,14 +64,15 @@ export const weightLogs = sqliteTable(
 export const foodLogs = sqliteTable(
   "food_logs",
   {
-    id: text("id").primaryKey(), // client UUID, same id pushed to server
+    id: text("id").primaryKey(),
     rawText: text("raw_text").notNull(),
+    explanation: text("explanation"),
     state: text("state", { enum: LOG_STATE_VALUES })
       .default("pending")
       .notNull(),
     errorMessage: text("error_message"),
     version: integer("version").default(1).notNull(),
-    syncedAt: integer("synced_at", { mode: "timestamp_ms" }), // null = needs push
+    syncedAt: integer("synced_at", { mode: "timestamp_ms" }),
     createdAt: integer("created_at", { mode: "timestamp_ms" })
       .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
       .notNull(),
@@ -97,7 +98,6 @@ export const foodLogItems = sqliteTable(
     carbsPer100: real("carbs_per_100").notNull(),
     proteinPer100: real("protein_per_100").notNull(),
     fatPer100: real("fat_per_100").notNull(),
-    // no syncedAt — items are always server-written, arrive via REST or WebSocket
     createdAt: integer("created_at", { mode: "timestamp_ms" })
       .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
       .notNull(),

@@ -5,6 +5,7 @@ import {
 import { ThemeProvider } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
+import { SQLiteProvider } from "expo-sqlite";
 import { StatusBar } from "expo-status-bar";
 import { ActivityIndicator, useColorScheme, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -60,9 +61,11 @@ export default function RootLayout() {
     <ThemeProvider value={isDark ? EvaDarkTheme : EvaLightTheme}>
       <SafeAreaProvider>
         <StatusBar style={isDark ? "light" : "dark"} />
-        <DbMigrations>
-          <RootNavigator />
-        </DbMigrations>
+        <SQLiteProvider databaseName="db.db">
+          <DbMigrations>
+            <RootNavigator />
+          </DbMigrations>
+        </SQLiteProvider>
       </SafeAreaProvider>
     </ThemeProvider>
   );
