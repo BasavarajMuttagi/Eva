@@ -10,6 +10,7 @@ import { StatusBar } from "expo-status-bar";
 import { ActivityIndicator, useColorScheme, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import "../../global.css";
+import { AppServices } from "../components/AppServices";
 import { DbMigrations } from "../components/DbMigrations";
 import { authClient } from "../lib/auth-client";
 import { EvaDarkTheme, EvaLightTheme } from "../theme/navigationTheme";
@@ -26,23 +27,26 @@ function RootNavigator() {
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false, animation: "default" }}>
-      <Stack.Protected guard={isLoggedIn}>
-        <Stack.Screen name="index" />
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen
-          name="(sheets)"
-          options={{
-            presentation: "fullScreenModal",
-            sheetGrabberVisible: true,
-            gestureEnabled: false,
-          }}
-        />
-      </Stack.Protected>
-      <Stack.Protected guard={!isLoggedIn}>
-        <Stack.Screen name="(auth)" />
-      </Stack.Protected>
-    </Stack>
+    <>
+      {isLoggedIn && <AppServices />}
+      <Stack screenOptions={{ headerShown: false, animation: "default" }}>
+        <Stack.Protected guard={isLoggedIn}>
+          <Stack.Screen name="index" />
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen
+            name="(sheets)"
+            options={{
+              presentation: "fullScreenModal",
+              sheetGrabberVisible: true,
+              gestureEnabled: false,
+            }}
+          />
+        </Stack.Protected>
+        <Stack.Protected guard={!isLoggedIn}>
+          <Stack.Screen name="(auth)" />
+        </Stack.Protected>
+      </Stack>
+    </>
   );
 }
 

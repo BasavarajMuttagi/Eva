@@ -1,7 +1,7 @@
 // src/lib/sync.ts
 import { db } from "@/src/db";
 import { foodLogItems, foodLogs } from "@/src/db/schema";
-import { eq, isNull } from "drizzle-orm";
+import { eq, isNull, lte } from "drizzle-orm";
 import { apiClient } from "./apiClient";
 
 let isSyncing = false;
@@ -30,7 +30,6 @@ export async function syncPendingLogs() {
     for (const log of unsynced) {
       try {
         if (log.version === 1) {
-          // new log — never been on server
           console.log(
             `[Sync] POST log ${log.id} v${log.version} — "${log.rawText}"`,
           );
@@ -48,7 +47,6 @@ export async function syncPendingLogs() {
             version: log.version,
           });
         } else {
-          // edited log — already exists on server, send new version
           console.log(
             `[Sync] PATCH log ${log.id} v${log.version} — "${log.rawText}"`,
           );
@@ -140,6 +138,9 @@ export async function fetchAndSyncFromServer() {
               syncedAt: new Date(),
               updatedAt: new Date(log.updatedAt),
             },
+            // only overwrite local if server version is >= local version
+            // prevents clobbering a local edit (version = 2) with stale server data (version = 1)
+            setWhere: lte(foodLogs.version, log.version),
           });
 
         for (const item of log.items ?? []) {
