@@ -3,8 +3,8 @@ import { db } from "@/src/db";
 import { foodLogItems, foodLogs } from "@/src/db/schema";
 import { eq } from "drizzle-orm";
 import { useEffect, useRef } from "react";
-import { API_BASE } from "./apiClient";
 import { authClient } from "./auth-client";
+import { API_BASE_URL } from "./constants";
 
 export function useWebSocket() {
   const ws = useRef<WebSocket | null>(null);
@@ -18,7 +18,7 @@ export function useWebSocket() {
 
   function connect() {
     const cookie = authClient.getCookie();
-    const wsBase = API_BASE.replace("https", "wss").replace("http", "ws");
+    const wsBase = API_BASE_URL.replace("https", "wss").replace("http", "ws");
     const url = `${wsBase}/api/ws?cookie=${encodeURIComponent(cookie ?? "")}`;
 
     console.log("[WS] connecting to", wsBase);

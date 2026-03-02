@@ -2,13 +2,14 @@
 import { expoClient } from "@better-auth/expo/client";
 import { createAuthClient } from "better-auth/react";
 import * as SecureStore from "expo-secure-store";
+import { API_BASE_URL } from "./constants";
 
 export const authClient = createAuthClient({
-  baseURL: "https://unsubtractive-babara-ovately.ngrok-free.dev", // your worker auth URL
+  baseURL: API_BASE_URL,
   plugins: [
     expoClient({
-      scheme: "eva", // <- matches app.json
-      storagePrefix: "eva", // any prefix you like
+      scheme: "eva",
+      storagePrefix: "eva",
       storage: SecureStore,
     }),
   ],

@@ -1,10 +1,9 @@
 import axios from "axios";
 import { authClient } from "./auth-client";
-
-export const API_BASE = "https://unsubtractive-babara-ovately.ngrok-free.dev";
+import { API_BASE_URL } from "./constants";
 
 export const apiClient = axios.create({
-  baseURL: API_BASE,
+  baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },

@@ -249,16 +249,27 @@ export default function TodayScreen() {
 
     if (log.state === "error") {
       return (
-        <View className="flex-row items-center gap-1">
+        <View className="flex-row items-center gap-2">
           <Icon
-            icon={Phosphor.WarningCircleIcon}
+            icon={Phosphor.SparkleIcon}
             size={14}
             weight="fill"
             className="text-red-500"
           />
-          <Text className="text-red-500 capitalize">
-            {log.errorMessage ?? "Error"}
-          </Text>
+          <TouchableOpacity
+            onPress={async () => {
+              await db
+                .update(foodLogs)
+                .set({
+                  state: "pending",
+                  errorMessage: null,
+                  updatedAt: new Date(),
+                })
+                .where(eq(foodLogs.id, log.id));
+            }}
+          >
+            <Text className="text-blue-500">Try again</Text>
+          </TouchableOpacity>
         </View>
       );
     }
