@@ -2,76 +2,29 @@
 import { db } from "@/src/db";
 import { foodLogItems, foodLogs } from "@/src/db/schema";
 import { eq } from "drizzle-orm";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { authClient } from "./auth-client";
 import { API_BASE_URL } from "./constants";
 
+type WsItem = Omit<typeof foodLogItems.$inferSelect, "syncedAt"> & {
+  createdAt: string;
+  updatedAt: string;
+};
+
+type WsPayload = {
+  type: string;
+  logId: string;
+  state: string;
+  explanation?: string;
+  errorMessage?: string;
+  items?: WsItem[];
+};
+
 export function useWebSocket() {
   const ws = useRef<WebSocket | null>(null);
+  const pingInterval = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  useEffect(() => {
-    connect();
-    return () => {
-      ws.current?.close(1000, "unmount");
-    };
-  }, []);
-
-  function connect() {
-    const cookie = authClient.getCookie();
-    const wsBase = API_BASE_URL.replace("https", "wss").replace("http", "ws");
-    const url = `${wsBase}/api/ws?cookie=${encodeURIComponent(cookie ?? "")}`;
-
-    console.log("[WS] connecting to", wsBase);
-
-    const socket = new WebSocket(url);
-    ws.current = socket;
-
-    socket.onopen = () => {
-      console.log("[WS] connected");
-    };
-
-    socket.onmessage = async (event) => {
-      try {
-        const payload = JSON.parse(event.data);
-        console.log("[WS] received:", payload);
-        await handleMessage(payload);
-      } catch (err) {
-        console.error("[WS] failed to handle message:", err);
-      }
-    };
-
-    socket.onclose = (event) => {
-      console.log("[WS] disconnected:", event.code);
-      if (event.code !== 1000) {
-        setTimeout(connect, 3000);
-      }
-    };
-
-    socket.onerror = (err) => {
-      console.error("[WS] error:", err);
-    };
-  }
-
-  async function handleMessage(payload: {
-    type: string;
-    logId: string;
-    state: string;
-    explanation?: string;
-    errorMessage?: string;
-    items?: Array<{
-      id: string;
-      foodName: string;
-      quantityDescription: string;
-      quantityTotal: number;
-      unit: "g" | "ml";
-      caloriesPer100: number;
-      carbsPer100: number;
-      proteinPer100: number;
-      fatPer100: number;
-      createdAt: string;
-      updatedAt: string;
-    }>;
-  }) {
+  const handleMessage = useCallback(async (payload: WsPayload) => {
     if (payload.type !== "log:updated") return;
 
     const now = new Date();
@@ -112,8 +65,9 @@ export function useWebSocket() {
 
       for (const item of payload.items) {
         await db.insert(foodLogItems).values({
-          id: item.id, // ← server id, same as in DB
+          id: item.id,
           logId: payload.logId,
+          userId: item.userId,
           foodName: item.foodName,
           quantityDescription: item.quantityDescription,
           quantityTotal: item.quantityTotal,
@@ -122,12 +76,66 @@ export function useWebSocket() {
           carbsPer100: item.carbsPer100,
           proteinPer100: item.proteinPer100,
           fatPer100: item.fatPer100,
-          createdAt: new Date(item.createdAt), // ← server timestamp
-          updatedAt: new Date(item.updatedAt), // ← server timestamp
+          createdAt: new Date(item.createdAt),
+          updatedAt: new Date(item.updatedAt),
         });
       }
 
       console.log(`[WS] ✓ log ${payload.logId} updated to done`);
     }
-  }
+  }, []);
+
+  const connect = useCallback(() => {
+    const cookie = authClient.getCookie();
+    const wsBase = API_BASE_URL.replace("https", "wss").replace("http", "ws");
+    const url = `${wsBase}/api/ws?cookie=${encodeURIComponent(cookie ?? "")}`;
+
+    console.log("[WS] connecting to", wsBase);
+
+    const socket = new WebSocket(url);
+    ws.current = socket;
+
+    socket.onopen = () => {
+      console.log("[WS] connected");
+      pingInterval.current = setInterval(() => {
+        if (socket.readyState === WebSocket.OPEN) {
+          socket.send("ping");
+        }
+      }, 30_000);
+    };
+
+    socket.onmessage = async (event) => {
+      if (event.data === "pong") return;
+      try {
+        const payload: WsPayload = JSON.parse(event.data);
+        console.log("[WS] received:", payload);
+        await handleMessage(payload);
+      } catch (err) {
+        console.error("[WS] failed to handle message:", err);
+      }
+    };
+
+    socket.onclose = (event) => {
+      console.log("[WS] disconnected:", event.code);
+      if (pingInterval.current) {
+        clearInterval(pingInterval.current);
+        pingInterval.current = null;
+      }
+      if (event.code !== 1000) {
+        setTimeout(connect, 3000);
+      }
+    };
+
+    socket.onerror = (err) => {
+      console.error("[WS] error:", err);
+    };
+  }, [handleMessage]);
+
+  useEffect(() => {
+    connect();
+    return () => {
+      if (pingInterval.current) clearInterval(pingInterval.current);
+      ws.current?.close(1000, "unmount");
+    };
+  }, [connect]);
 }

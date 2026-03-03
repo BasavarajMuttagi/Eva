@@ -4,7 +4,7 @@ import { foodLogs } from "@/src/db/schema";
 import { apiClient } from "@/src/lib/apiClient";
 import { eq } from "drizzle-orm";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import { useLayoutEffect, useState } from "react";
+import { useCallback, useLayoutEffect, useState } from "react";
 import {
   Pressable,
   Text,
@@ -28,6 +28,44 @@ export default function EditLogScreen() {
   const [saving, setSaving] = useState(false);
 
   const hasChanged = text.trim() !== rawText?.trim();
+
+  const handleSave = useCallback(async () => {
+    if (!hasChanged || saving) return;
+
+    setSaving(true);
+    const now = new Date();
+    const newVersion = Number(version) + 1;
+
+    try {
+      await db
+        .update(foodLogs)
+        .set({
+          rawText: text.trim(),
+          state: "pending",
+          syncedAt: null,
+          version: newVersion,
+          updatedAt: now,
+        })
+        .where(eq(foodLogs.id, id));
+
+      await apiClient.patch(`/api/log/${id}`, {
+        rawText: text.trim(),
+        version: newVersion,
+        updatedAt: now.getTime(),
+      });
+
+      await db
+        .update(foodLogs)
+        .set({ syncedAt: now })
+        .where(eq(foodLogs.id, id));
+
+      router.dismiss();
+    } catch (err) {
+      console.error("[EditLog] failed to save:", err);
+    } finally {
+      setSaving(false);
+    }
+  }, [hasChanged, saving, text, version, id, router]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -58,61 +96,25 @@ export default function EditLogScreen() {
         <TouchableOpacity
           onPress={handleSave}
           disabled={!hasChanged || saving}
-          className={`px-4 py-2 rounded-full ${hasChanged && !saving ? "bg-accent-light dark:bg-accent-dark" : "bg-chip-light dark:bg-chip-dark"}`}
+          className={`px-4 py-2 rounded-full ${
+            hasChanged && !saving
+              ? "bg-accent-light dark:bg-accent-dark"
+              : "bg-chip-light dark:bg-chip-dark"
+          }`}
         >
           <Text
-            className={`text-sm font-medium ${hasChanged && !saving ? "text-white" : "text-text-secondary-light dark:text-text-secondary-dark"}`}
+            className={`text-sm font-medium ${
+              hasChanged && !saving
+                ? "text-white"
+                : "text-text-secondary-light dark:text-text-secondary-dark"
+            }`}
           >
             {saving ? "Saving..." : "Save"}
           </Text>
         </TouchableOpacity>
       ),
     });
-  }, [navigation, hasChanged, saving, text]);
-
-  const handleSave = async () => {
-    if (!hasChanged || saving) return;
-
-    setSaving(true);
-    const now = new Date();
-    const newVersion = Number(version) + 1;
-
-    try {
-      // 1. update SQLite immediately — syncedAt = null triggers sync engine
-      await db
-        .update(foodLogs)
-        .set({
-          rawText: text.trim(),
-          state: "pending",
-          syncedAt: null,
-          version: newVersion,
-          updatedAt: now,
-        })
-        .where(eq(foodLogs.id, id));
-
-      // 2. PATCH server directly (don't wait for sync engine for edits)
-      // sync engine uses version > 1 to know this is a PATCH not POST
-      // but for edits we push immediately since the log already exists on server
-      await apiClient.patch(`/api/log/${id}`, {
-        rawText: text.trim(),
-        version: newVersion,
-        updatedAt: now.getTime(),
-      });
-
-      // 3. mark synced
-      await db
-        .update(foodLogs)
-        .set({ syncedAt: now })
-        .where(eq(foodLogs.id, id));
-
-      router.dismiss();
-    } catch (err) {
-      console.error("[EditLog] failed to save:", err);
-      // leave syncedAt = null so sync engine retries
-    } finally {
-      setSaving(false);
-    }
-  };
+  }, [navigation, hasChanged, saving, handleSave, router]);
 
   return (
     <SafeAreaView className="flex-1">

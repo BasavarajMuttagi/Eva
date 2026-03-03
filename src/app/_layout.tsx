@@ -12,6 +12,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import "../../global.css";
 import { AppServices } from "../components/AppServices";
 import { DbMigrations } from "../components/DbMigrations";
+import { OfflineBanner } from "../components/OfflineBanner";
 import { authClient } from "../lib/auth-client";
 import { EvaDarkTheme, EvaLightTheme } from "../theme/navigationTheme";
 function RootNavigator() {
@@ -29,7 +30,12 @@ function RootNavigator() {
   return (
     <>
       {isLoggedIn && <AppServices />}
-      <Stack screenOptions={{ headerShown: false, animation: "default" }}>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          animation: "default",
+        }}
+      >
         <Stack.Protected guard={isLoggedIn}>
           <Stack.Screen name="index" />
           <Stack.Screen name="(tabs)" />
@@ -63,6 +69,7 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={isDark ? EvaDarkTheme : EvaLightTheme}>
+      <OfflineBanner />
       <SafeAreaProvider>
         <StatusBar style={isDark ? "light" : "dark"} />
         <SQLiteProvider databaseName="db.db">

@@ -24,7 +24,7 @@ export const LOG_STATE_VALUES = [
 export const UNIT_VALUES = ["g", "ml"] as const;
 
 export const userPreferences = sqliteTable("user_preferences", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: text("user_id").primaryKey(), // same as server, no .references()
   heightCm: integer("height_cm").notNull(),
   weightKg: real("weight_kg").notNull(),
   age: integer("age").notNull(),
@@ -36,7 +36,7 @@ export const userPreferences = sqliteTable("user_preferences", {
   sleepTrackingEnabled: integer("sleep_tracking_enabled", { mode: "boolean" })
     .default(false)
     .notNull(),
-  syncedAt: integer("synced_at", { mode: "timestamp_ms" }),
+  syncedAt: integer("synced_at", { mode: "timestamp_ms" }), // client only
   createdAt: integer("created_at", { mode: "timestamp_ms" })
     .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
     .notNull(),
@@ -49,8 +49,9 @@ export const weightLogs = sqliteTable(
   "weight_logs",
   {
     id: text("id").primaryKey(),
+    userId: text("user_id").notNull(), // no .references()
     weightKg: real("weight_kg").notNull(),
-    syncedAt: integer("synced_at", { mode: "timestamp_ms" }),
+    syncedAt: integer("synced_at", { mode: "timestamp_ms" }), // client only
     createdAt: integer("created_at", { mode: "timestamp_ms" })
       .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
       .notNull(),
@@ -65,6 +66,7 @@ export const foodLogs = sqliteTable(
   "food_logs",
   {
     id: text("id").primaryKey(),
+    userId: text("user_id").notNull(), // no .references()
     rawText: text("raw_text").notNull(),
     explanation: text("explanation"),
     state: text("state", { enum: LOG_STATE_VALUES })
@@ -72,7 +74,7 @@ export const foodLogs = sqliteTable(
       .notNull(),
     errorMessage: text("error_message"),
     version: integer("version").default(1).notNull(),
-    syncedAt: integer("synced_at", { mode: "timestamp_ms" }),
+    syncedAt: integer("synced_at", { mode: "timestamp_ms" }), // client only
     createdAt: integer("created_at", { mode: "timestamp_ms" })
       .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
       .notNull(),
@@ -87,9 +89,8 @@ export const foodLogItems = sqliteTable(
   "food_log_items",
   {
     id: text("id").primaryKey(),
-    logId: text("log_id")
-      .notNull()
-      .references(() => foodLogs.id, { onDelete: "cascade" }),
+    logId: text("log_id").notNull(), // no .references()
+    userId: text("user_id").notNull(), // no .references()
     foodName: text("food_name").notNull(),
     quantityDescription: text("quantity_description").notNull(),
     quantityTotal: real("quantity_total").notNull(),
@@ -105,7 +106,10 @@ export const foodLogItems = sqliteTable(
       .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
       .notNull(),
   },
-  (table) => [index("food_items_log_idx").on(table.logId)],
+  (table) => [
+    index("food_items_log_idx").on(table.logId),
+    index("food_items_user_idx").on(table.userId),
+  ],
 );
 
 // ---- Relations ----

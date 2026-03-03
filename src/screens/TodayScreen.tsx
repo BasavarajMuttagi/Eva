@@ -10,6 +10,7 @@ import {
   Alert,
   FlatList,
   Pressable,
+  RefreshControl,
   Text,
   TextInput,
   TouchableOpacity,
@@ -22,33 +23,9 @@ import Swipeable, {
 import "react-native-get-random-values";
 import { SharedValue } from "react-native-reanimated";
 import { v4 as uuidv4 } from "uuid";
-
-type FoodLogItem = {
-  id: string;
-  logId: string;
-  foodName: string;
-  quantityDescription: string;
-  quantityTotal: number;
-  unit: "g" | "ml";
-  caloriesPer100: number;
-  carbsPer100: number;
-  proteinPer100: number;
-  fatPer100: number;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-type FoodLog = {
-  id: string;
-  rawText: string;
-  state: "pending" | "processing" | "done" | "error";
-  errorMessage: string | null;
-  version: number;
-  syncedAt: number | null;
-  createdAt: Date;
-  updatedAt: Date;
-  items: FoodLogItem[];
-};
+import { apiClient } from "../lib/apiClient";
+import { authClient } from "../lib/auth-client";
+import { FoodLog } from "../types";
 
 function RightActions({
   dragX,
@@ -148,7 +125,9 @@ function SwipeableRow({
 
 export default function TodayScreen() {
   const router = useRouter();
-  const { data: logs = [] } = useLiveQuery(
+  const { data: session } = authClient.useSession();
+  const userId = session?.user?.id ?? "";
+  const { data: logs = [], updatedAt } = useLiveQuery(
     db.query.foodLogs.findMany({
       orderBy: desc(foodLogs.createdAt),
       with: { items: true },
@@ -158,7 +137,7 @@ export default function TodayScreen() {
   const [input, setInput] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-
+  const isLoading = updatedAt === undefined;
   const totalCalories = (log: FoodLog) => {
     if (!log.items || log.items.length === 0) return undefined;
     return log.items.reduce(
@@ -167,7 +146,7 @@ export default function TodayScreen() {
     );
   };
 
-  const handleRefresh = async () => {
+  const onRefresh = async () => {
     setRefreshing(true);
     await fetchAndSyncFromServer();
     setRefreshing(false);
@@ -181,6 +160,7 @@ export default function TodayScreen() {
 
     await db.insert(foodLogs).values({
       id,
+      userId,
       rawText: input.trim(),
       state: "pending",
       version: 1,
@@ -207,6 +187,11 @@ export default function TodayScreen() {
           setDeletingId(logId);
           try {
             await db.delete(foodLogs).where(eq(foodLogs.id, logId));
+            apiClient
+              .delete(`/api/log/${logId}`)
+              .catch((err) =>
+                console.warn("[Delete] server delete failed:", err),
+              );
           } catch (error) {
             console.error("Delete failed:", error);
             Alert.alert("Error", "Failed to delete log. Try again.");
@@ -263,6 +248,7 @@ export default function TodayScreen() {
                 .set({
                   state: "pending",
                   errorMessage: null,
+                  syncedAt: null,
                   updatedAt: new Date(),
                 })
                 .where(eq(foodLogs.id, log.id));
@@ -302,45 +288,68 @@ export default function TodayScreen() {
 
   return (
     <GestureHandlerRootView className="flex-1">
-      <View className="flex-1 gap-y-5 bg-screen-light dark:bg-screen-dark px-5">
+      <View className="flex-1 gap-y-5 bg-screen-light dark:bg-screen-dark px-6 pt-4">
         <View className="flex-row items-center justify-between border-border-light dark:border-border-dark">
           <TextInput
             value={input}
             onChangeText={setInput}
             placeholder="What did you eat?"
             placeholderTextColor="#6B6B6B"
-            className="flex-1 text-base text-text-primary-light dark:text-text-primary-dark"
+            className="flex-1 text-lg text-text-primary-light dark:text-text-primary-dark"
+            style={{ lineHeight: undefined }}
             onSubmitEditing={addLog}
             returnKeyType="done"
           />
-          <View className="flex-row items-center gap-2">
-            <TouchableOpacity
-              onPress={handleRefresh}
-              disabled={refreshing}
-              className="p-2 rounded-full border border-border-light dark:border-border-dark"
-            >
-              <Icon
-                icon={Phosphor.ArrowsClockwiseIcon}
-                size={18}
-                weight="bold"
-                className={`text-text-primary-light dark:text-text-primary-dark ${refreshing ? "opacity-40" : ""}`}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={addLog}
-              className="bg-accent-light dark:bg-accent-dark px-4 py-2 rounded-full"
-            >
-              <Text className="text-white text-sm">Add</Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity
+            onPress={addLog}
+            disabled={!input.trim()}
+            className={`px-4 py-2 rounded-full ${input.trim() ? "bg-accent-light dark:bg-accent-dark" : "bg-accent-light/40 dark:bg-accent-dark/40"}`}
+          >
+            <Text className="text-white text-sm">Add</Text>
+          </TouchableOpacity>
         </View>
 
         <FlatList
           data={logs as FoodLog[]}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
-          contentContainerStyle={{ paddingBottom: 40 }}
+          contentContainerStyle={{ paddingBottom: 40, flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+          ListEmptyComponent={
+            <View className="flex-1 items-center justify-center gap-3">
+              {isLoading ? (
+                <>
+                  <Icon
+                    icon={Phosphor.SparkleIcon}
+                    size={32}
+                    weight="fill"
+                    className="text-accent-light dark:text-accent-dark opacity-40"
+                  />
+                  <Text className="text-text-secondary-light dark:text-text-secondary-dark text-sm">
+                    Loading...
+                  </Text>
+                </>
+              ) : (
+                <>
+                  <Icon
+                    icon={Phosphor.ForkKnifeIcon}
+                    size={32}
+                    weight="duotone"
+                    className="text-text-secondary-light dark:text-text-secondary-dark opacity-40"
+                  />
+                  <Text className="text-text-primary-light dark:text-text-primary-dark text-base font-medium">
+                    Nothing logged yet
+                  </Text>
+                  <Text className="text-text-secondary-light dark:text-text-secondary-dark text-sm text-center px-8">
+                    Type what you ate above and tap Add
+                  </Text>
+                </>
+              )}
+            </View>
+          }
         />
       </View>
     </GestureHandlerRootView>

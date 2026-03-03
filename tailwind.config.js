@@ -48,7 +48,10 @@ module.exports = {
           },
         },
 
-        danger: "#E05A2B",
+        danger: {
+          light: "#F96B6B", // your peach/red background
+          dark: "#F2A899", // your lighter peach border color
+        },
       },
     },
   },

@@ -77,28 +77,13 @@ export async function syncPendingLogs() {
   }
 }
 
-type ServerFoodLogItem = {
-  id: string;
-  logId: string;
-  foodName: string;
-  quantityDescription: string;
-  quantityTotal: number;
-  unit: "g" | "ml";
-  caloriesPer100: number;
-  carbsPer100: number;
-  proteinPer100: number;
-  fatPer100: number;
+// server response types — omit client-only syncedAt field
+type ServerFoodLogItem = Omit<typeof foodLogItems.$inferSelect, "syncedAt"> & {
   createdAt: string;
   updatedAt: string;
 };
 
-type ServerFoodLog = {
-  id: string;
-  rawText: string;
-  explanation: string | null;
-  state: "pending" | "processing" | "done" | "error";
-  errorMessage: string | null;
-  version: number;
+type ServerFoodLog = Omit<typeof foodLogs.$inferSelect, "syncedAt"> & {
   createdAt: string;
   updatedAt: string;
   items: ServerFoodLogItem[];
@@ -118,6 +103,7 @@ export async function fetchAndSyncFromServer() {
           .insert(foodLogs)
           .values({
             id: log.id,
+            userId: log.userId,
             rawText: log.rawText,
             explanation: log.explanation,
             state: log.state,
@@ -138,8 +124,6 @@ export async function fetchAndSyncFromServer() {
               syncedAt: new Date(),
               updatedAt: new Date(log.updatedAt),
             },
-            // only overwrite local if server version is >= local version
-            // prevents clobbering a local edit (version = 2) with stale server data (version = 1)
             setWhere: lte(foodLogs.version, log.version),
           });
 
@@ -149,6 +133,7 @@ export async function fetchAndSyncFromServer() {
             .values({
               id: item.id,
               logId: item.logId,
+              userId: item.userId,
               foodName: item.foodName,
               quantityDescription: item.quantityDescription,
               quantityTotal: item.quantityTotal,
