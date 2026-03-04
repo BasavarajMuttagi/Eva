@@ -1,6 +1,6 @@
-// src/lib/useWebSocket.ts
 import { db } from "@/src/db";
 import { foodLogItems, foodLogs } from "@/src/db/schema";
+import NetInfo from "@react-native-community/netinfo";
 import { eq } from "drizzle-orm";
 import { useCallback, useEffect, useRef } from "react";
 import { authClient } from "./auth-client";
@@ -26,13 +26,60 @@ type WsPayload =
       items: WsItem[];
     };
 
+const BASE_DELAY = 3_000;
+const MAX_DELAY = 60_000;
+const MAX_ATTEMPTS = 8;
+
+function getBackoffDelay(attempt: number) {
+  const delay = Math.min(BASE_DELAY * 2 ** attempt, MAX_DELAY);
+  return delay * (0.8 + Math.random() * 0.4); // ±20% jitter
+}
+
 export function useWebSocket() {
   const ws = useRef<WebSocket | null>(null);
   const pingInterval = useRef<ReturnType<typeof setInterval> | null>(null);
+  const reconnectTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const attempts = useRef(0);
+  const mounted = useRef(true);
+
+  const stopPing = () => {
+    if (pingInterval.current) {
+      clearInterval(pingInterval.current);
+      pingInterval.current = null;
+    }
+  };
+
+  const stopReconnect = () => {
+    if (reconnectTimeout.current) {
+      clearTimeout(reconnectTimeout.current);
+      reconnectTimeout.current = null;
+    }
+  };
+
+  const scheduleReconnect = useCallback((connectFn: () => void) => {
+    if (!mounted.current) return;
+    if (attempts.current >= MAX_ATTEMPTS) {
+      console.warn("[WS] max reconnect attempts reached, giving up");
+      return;
+    }
+
+    NetInfo.fetch().then((state) => {
+      if (!mounted.current) return;
+      if (!state.isConnected || !state.isInternetReachable) {
+        console.log("[WS] offline — will reconnect when internet restores");
+        return;
+      }
+      const delay = getBackoffDelay(attempts.current);
+      attempts.current += 1;
+      console.log(
+        `[WS] reconnecting in ${Math.round(delay / 1000)}s (attempt ${attempts.current})`,
+      );
+      reconnectTimeout.current = setTimeout(connectFn, delay);
+    });
+  }, []);
 
   const handleMessage = useCallback(async (payload: WsPayload) => {
     if (payload.type !== "log:updated") return;
-
     const now = new Date();
 
     if (payload.state === "processing") {
@@ -59,7 +106,6 @@ export function useWebSocket() {
       await db
         .delete(foodLogItems)
         .where(eq(foodLogItems.logId, payload.logId));
-
       await db
         .update(foodLogs)
         .set({
@@ -100,21 +146,21 @@ export function useWebSocket() {
   }, []);
 
   const connect = useCallback(() => {
+    if (!mounted.current) return;
+
     const cookie = authClient.getCookie();
     const wsBase = API_BASE_URL.replace("https", "wss").replace("http", "ws");
     const url = `${wsBase}/api/ws?cookie=${encodeURIComponent(cookie ?? "")}`;
 
-    console.log("[WS] connecting to", wsBase);
-
+    console.log(`[WS] connecting (attempt ${attempts.current + 1})`);
     const socket = new WebSocket(url);
     ws.current = socket;
 
     socket.onopen = () => {
       console.log("[WS] connected");
+      attempts.current = 0;
       pingInterval.current = setInterval(() => {
-        if (socket.readyState === WebSocket.OPEN) {
-          socket.send("ping");
-        }
+        if (socket.readyState === WebSocket.OPEN) socket.send("ping");
       }, 30_000);
     };
 
@@ -129,26 +175,38 @@ export function useWebSocket() {
       }
     };
 
-    socket.onclose = (event) => {
-      console.log("[WS] disconnected:", event.code);
-      if (pingInterval.current) {
-        clearInterval(pingInterval.current);
-        pingInterval.current = null;
-      }
-      if (event.code !== 1000) {
-        setTimeout(connect, 3000);
-      }
-    };
+    socket.onerror = () => console.warn("[WS] connection error");
 
-    socket.onerror = (err) => {
-      console.error("[WS] error:", err);
+    socket.onclose = (event) => {
+      console.log(`[WS] disconnected: code=${event.code}`);
+      stopPing();
+      if (event.code !== 1000) scheduleReconnect(connect);
     };
-  }, [handleMessage]);
+  }, [handleMessage, scheduleReconnect]);
+
+  // Reconnect immediately when internet restores
+  useEffect(() => {
+    const unsub = NetInfo.addEventListener((state) => {
+      const isOnline = state.isConnected && state.isInternetReachable;
+      const isClosed =
+        !ws.current || ws.current.readyState === WebSocket.CLOSED;
+      if (isOnline && isClosed && mounted.current) {
+        console.log("[WS] internet restored, reconnecting");
+        stopReconnect();
+        attempts.current = 0;
+        connect();
+      }
+    });
+    return () => unsub();
+  }, [connect]);
 
   useEffect(() => {
+    mounted.current = true;
     connect();
     return () => {
-      if (pingInterval.current) clearInterval(pingInterval.current);
+      mounted.current = false;
+      stopPing();
+      stopReconnect();
       ws.current?.close(1000, "unmount");
     };
   }, [connect]);
