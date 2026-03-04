@@ -22,6 +22,22 @@ export default function SheetLayout() {
           sheetGrabberVisible: true,
         }}
       />
+      <Stack.Screen
+        name="profile"
+        options={{
+          headerTitle: "Profile",
+          animation: "slide_from_bottom",
+          headerShadowVisible: false,
+        }}
+      />
+      <Stack.Screen
+        name="detailed-log"
+        options={{
+          headerTitle: "DetailedLog",
+          animation: "slide_from_bottom",
+          headerShadowVisible: false,
+        }}
+      />
     </Stack>
   );
 }

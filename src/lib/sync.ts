@@ -1,6 +1,5 @@
-// src/lib/sync.ts
 import { db } from "@/src/db";
-import { foodLogItems, foodLogs } from "@/src/db/schema";
+import { foodLogItems, foodLogs, userPreferences } from "@/src/db/schema";
 import { eq, isNull, lte } from "drizzle-orm";
 import { apiClient } from "./apiClient";
 
@@ -77,7 +76,6 @@ export async function syncPendingLogs() {
   }
 }
 
-// server response types — omit client-only syncedAt field
 type ServerFoodLogItem = Omit<typeof foodLogItems.$inferSelect, "syncedAt"> & {
   createdAt: string;
   updatedAt: string;
@@ -87,6 +85,14 @@ type ServerFoodLog = Omit<typeof foodLogs.$inferSelect, "syncedAt"> & {
   createdAt: string;
   updatedAt: string;
   items: ServerFoodLogItem[];
+};
+
+type ServerPreferences = Omit<
+  typeof userPreferences.$inferSelect,
+  "syncedAt"
+> & {
+  createdAt: string;
+  updatedAt: string;
 };
 
 export async function fetchAndSyncFromServer() {
@@ -109,6 +115,10 @@ export async function fetchAndSyncFromServer() {
             state: log.state,
             errorMessage: log.errorMessage,
             version: log.version,
+            totalCalories: log.totalCalories,
+            totalProtein: log.totalProtein,
+            totalCarbs: log.totalCarbs,
+            totalFat: log.totalFat,
             syncedAt: new Date(),
             createdAt: new Date(log.createdAt),
             updatedAt: new Date(log.updatedAt),
@@ -121,6 +131,10 @@ export async function fetchAndSyncFromServer() {
               state: log.state,
               errorMessage: log.errorMessage,
               version: log.version,
+              totalCalories: log.totalCalories,
+              totalProtein: log.totalProtein,
+              totalCarbs: log.totalCarbs,
+              totalFat: log.totalFat,
               syncedAt: new Date(),
               updatedAt: new Date(log.updatedAt),
             },
@@ -142,6 +156,10 @@ export async function fetchAndSyncFromServer() {
               carbsPer100: item.carbsPer100,
               proteinPer100: item.proteinPer100,
               fatPer100: item.fatPer100,
+              calories: item.calories,
+              protein: item.protein,
+              carbs: item.carbs,
+              fat: item.fat,
               createdAt: new Date(item.createdAt),
               updatedAt: new Date(item.updatedAt),
             })
@@ -153,5 +171,48 @@ export async function fetchAndSyncFromServer() {
     console.log("[Sync] server sync complete");
   } catch (err) {
     console.warn("[Sync] failed to fetch from server:", err);
+  }
+}
+
+export async function fetchAndSyncPreferences() {
+  try {
+    const res = await apiClient.get<ServerPreferences | null>(
+      "/api/preferences",
+    );
+    const serverPref = res.data;
+
+    if (!serverPref) return;
+
+    await db
+      .insert(userPreferences)
+      .values({
+        userId: serverPref.userId,
+        heightCm: serverPref.heightCm,
+        weightKg: serverPref.weightKg,
+        age: serverPref.age,
+        gender: serverPref.gender,
+        activityLevel: serverPref.activityLevel,
+        waterTrackingEnabled: serverPref.waterTrackingEnabled,
+        sleepTrackingEnabled: serverPref.sleepTrackingEnabled,
+        createdAt: new Date(serverPref.createdAt),
+        updatedAt: new Date(serverPref.updatedAt),
+      })
+      .onConflictDoUpdate({
+        target: userPreferences.userId,
+        set: {
+          heightCm: serverPref.heightCm,
+          weightKg: serverPref.weightKg,
+          age: serverPref.age,
+          gender: serverPref.gender,
+          activityLevel: serverPref.activityLevel,
+          waterTrackingEnabled: serverPref.waterTrackingEnabled,
+          sleepTrackingEnabled: serverPref.sleepTrackingEnabled,
+          updatedAt: new Date(serverPref.updatedAt),
+        },
+      });
+
+    console.log("[Sync] ✓ preferences fetched from server");
+  } catch (err) {
+    console.warn("[Sync] failed to fetch preferences:", err);
   }
 }

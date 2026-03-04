@@ -14,11 +14,15 @@ import { AppServices } from "../components/AppServices";
 import { DbMigrations } from "../components/DbMigrations";
 import { OfflineBanner } from "../components/OfflineBanner";
 import { authClient } from "../lib/auth-client";
+import { useOnboardingStatus } from "../store/OnboardingStatus";
 import { EvaDarkTheme, EvaLightTheme } from "../theme/navigationTheme";
+
 function RootNavigator() {
   const { data: session, isPending } = authClient.useSession();
   const isLoggedIn = !!session;
-
+  const isOnboarding = useOnboardingStatus(
+    (state) => state.isOnboardingComplete,
+  );
   if (isPending) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -36,7 +40,10 @@ function RootNavigator() {
           animation: "default",
         }}
       >
-        <Stack.Protected guard={isLoggedIn}>
+        <Stack.Protected guard={isLoggedIn && !isOnboarding}>
+          <Stack.Screen name="(onboarding)" />
+        </Stack.Protected>
+        <Stack.Protected guard={isLoggedIn && isOnboarding}>
           <Stack.Screen name="index" />
           <Stack.Screen name="(tabs)" />
           <Stack.Screen

@@ -11,14 +11,20 @@ type WsItem = Omit<typeof foodLogItems.$inferSelect, "syncedAt"> & {
   updatedAt: string;
 };
 
-type WsPayload = {
-  type: string;
-  logId: string;
-  state: string;
-  explanation?: string;
-  errorMessage?: string;
-  items?: WsItem[];
-};
+type WsPayload =
+  | { type: "log:updated"; logId: string; state: "processing" }
+  | { type: "log:updated"; logId: string; state: "error"; errorMessage: string }
+  | {
+      type: "log:updated";
+      logId: string;
+      state: "done";
+      explanation: string;
+      totalCalories: number;
+      totalProtein: number;
+      totalCarbs: number;
+      totalFat: number;
+      items: WsItem[];
+    };
 
 export function useWebSocket() {
   const ws = useRef<WebSocket | null>(null);
@@ -42,14 +48,14 @@ export function useWebSocket() {
         .update(foodLogs)
         .set({
           state: "error",
-          errorMessage: payload.errorMessage ?? "Error",
+          errorMessage: payload.errorMessage,
           updatedAt: now,
         })
         .where(eq(foodLogs.id, payload.logId));
       return;
     }
 
-    if (payload.state === "done" && payload.items) {
+    if (payload.state === "done") {
       await db
         .delete(foodLogItems)
         .where(eq(foodLogItems.logId, payload.logId));
@@ -58,7 +64,11 @@ export function useWebSocket() {
         .update(foodLogs)
         .set({
           state: "done",
-          explanation: payload.explanation ?? null,
+          explanation: payload.explanation,
+          totalCalories: payload.totalCalories,
+          totalProtein: payload.totalProtein,
+          totalCarbs: payload.totalCarbs,
+          totalFat: payload.totalFat,
           updatedAt: now,
         })
         .where(eq(foodLogs.id, payload.logId));
@@ -76,6 +86,10 @@ export function useWebSocket() {
           carbsPer100: item.carbsPer100,
           proteinPer100: item.proteinPer100,
           fatPer100: item.fatPer100,
+          calories: item.calories,
+          protein: item.protein,
+          carbs: item.carbs,
+          fat: item.fat,
           createdAt: new Date(item.createdAt),
           updatedAt: new Date(item.updatedAt),
         });
@@ -108,7 +122,7 @@ export function useWebSocket() {
       if (event.data === "pong") return;
       try {
         const payload: WsPayload = JSON.parse(event.data);
-        console.log("[WS] received:", payload);
+        console.log("[WS] received:", JSON.stringify(payload).slice(0, 200));
         await handleMessage(payload);
       } catch (err) {
         console.error("[WS] failed to handle message:", err);

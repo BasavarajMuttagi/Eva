@@ -1,11 +1,14 @@
-// src/lib/useSyncEngine.ts
 import { db } from "@/src/db";
 import { foodLogs } from "@/src/db/schema";
 import { isNull } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useEffect, useRef } from "react";
 import { AppState, AppStateStatus } from "react-native";
-import { fetchAndSyncFromServer, syncPendingLogs } from "./sync";
+import {
+  fetchAndSyncFromServer,
+  fetchAndSyncPreferences,
+  syncPendingLogs,
+} from "./sync";
 
 export function useSyncEngine() {
   const appState = useRef(AppState.currentState);
@@ -14,7 +17,6 @@ export function useSyncEngine() {
     db.select().from(foodLogs).where(isNull(foodLogs.syncedAt)),
   );
 
-  // fires immediately when a new unsynced log appears
   useEffect(() => {
     if (unsyncedLogs.length === 0) return;
     console.log(
@@ -23,11 +25,11 @@ export function useSyncEngine() {
     syncPendingLogs();
   }, [unsyncedLogs]);
 
-  // on mount — push pending + pull from server
   useEffect(() => {
     console.log("[SyncEngine] mounted, initial sync");
     syncPendingLogs();
     fetchAndSyncFromServer();
+    fetchAndSyncPreferences(); // hydrate local DB once on mount
 
     const sub = AppState.addEventListener("change", (next: AppStateStatus) => {
       console.log(`[SyncEngine] app state: ${appState.current} → ${next}`);
@@ -35,6 +37,7 @@ export function useSyncEngine() {
         console.log("[SyncEngine] foregrounded, syncing");
         syncPendingLogs();
         fetchAndSyncFromServer();
+        fetchAndSyncPreferences();
       }
       appState.current = next;
     });

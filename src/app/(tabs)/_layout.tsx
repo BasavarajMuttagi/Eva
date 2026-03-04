@@ -35,12 +35,12 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="logs"
+        name="insights"
         options={{
-          title: "Logs",
+          title: "Insights",
           tabBarIcon: ({ color }) => (
             <Icon
-              icon={Phosphor.FileTextIcon}
+              icon={Phosphor.ChartBarIcon}
               size={24}
               color={color}
               weight="fill"

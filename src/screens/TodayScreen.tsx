@@ -25,7 +25,8 @@ import { SharedValue } from "react-native-reanimated";
 import { v4 as uuidv4 } from "uuid";
 import { apiClient } from "../lib/apiClient";
 import { authClient } from "../lib/auth-client";
-import { FoodLog } from "../types";
+
+type FoodLog = typeof foodLogs.$inferSelect;
 
 function RightActions({
   dragX,
@@ -92,6 +93,7 @@ function SwipeableRow({
   onEdit: (log: FoodLog, close: () => void) => void;
   onDelete: (id: string, close: () => void) => void;
 }) {
+  const router = useRouter();
   const swipeableRef = useRef<SwipeableMethods>(null);
   const close = () => swipeableRef.current?.close();
 
@@ -110,7 +112,15 @@ function SwipeableRow({
         />
       )}
     >
-      <Pressable className="flex-row items-center justify-between py-3 bg-screen-light dark:bg-screen-dark">
+      <Pressable
+        onPress={() =>
+          router.push({
+            pathname: "/(sheets)/detailed-log",
+            params: { id: item.id },
+          })
+        }
+        className="flex-row items-center justify-between py-3 bg-screen-light dark:bg-screen-dark"
+      >
         <Text
           numberOfLines={1}
           className="flex-1 pr-4 text-text-primary-light dark:text-text-primary-dark text-base"
@@ -127,24 +137,18 @@ export default function TodayScreen() {
   const router = useRouter();
   const { data: session } = authClient.useSession();
   const userId = session?.user?.id ?? "";
+
   const { data: logs = [], updatedAt } = useLiveQuery(
     db.query.foodLogs.findMany({
       orderBy: desc(foodLogs.createdAt),
-      with: { items: true },
     }),
   );
 
   const [input, setInput] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+
   const isLoading = updatedAt === undefined;
-  const totalCalories = (log: FoodLog) => {
-    if (!log.items || log.items.length === 0) return undefined;
-    return log.items.reduce(
-      (sum, item) => sum + (item.caloriesPer100 / 100) * item.quantityTotal,
-      0,
-    );
-  };
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -260,7 +264,6 @@ export default function TodayScreen() {
       );
     }
 
-    const kcal = totalCalories(log);
     return (
       <View className="flex-row items-center gap-1">
         <Icon
@@ -270,7 +273,9 @@ export default function TodayScreen() {
           className="text-accent-light dark:text-accent-dark"
         />
         <Text className="text-text-secondary-light dark:text-text-secondary-dark">
-          {kcal ? Math.round(kcal) + " kcal" : "—"}
+          {log.totalCalories > 0
+            ? Math.round(log.totalCalories) + " kcal"
+            : "—"}
         </Text>
       </View>
     );
@@ -288,13 +293,14 @@ export default function TodayScreen() {
 
   return (
     <GestureHandlerRootView className="flex-1">
-      <View className="flex-1 gap-y-5 bg-screen-light dark:bg-screen-dark px-6 pt-4">
+      <View className="flex-1 gap-y-5 bg-screen-light dark:bg-screen-dark p-5">
         <View className="flex-row items-center justify-between border-border-light dark:border-border-dark">
           <TextInput
             value={input}
             onChangeText={setInput}
             placeholder="What did you eat?"
             placeholderTextColor="#6B6B6B"
+            placeholderClassName="text-lg"
             className="flex-1 text-lg text-text-primary-light dark:text-text-primary-dark"
             style={{ lineHeight: undefined }}
             onSubmitEditing={addLog}
@@ -303,14 +309,18 @@ export default function TodayScreen() {
           <TouchableOpacity
             onPress={addLog}
             disabled={!input.trim()}
-            className={`px-4 py-2 rounded-full ${input.trim() ? "bg-accent-light dark:bg-accent-dark" : "bg-accent-light/40 dark:bg-accent-dark/40"}`}
+            className={`px-4 py-2 rounded-full ${
+              input.trim()
+                ? "bg-accent-light dark:bg-accent-dark"
+                : "bg-accent-light/40 dark:bg-accent-dark/40"
+            }`}
           >
             <Text className="text-white text-sm">Add</Text>
           </TouchableOpacity>
         </View>
 
         <FlatList
-          data={logs as FoodLog[]}
+          data={logs}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
           contentContainerStyle={{ paddingBottom: 40, flexGrow: 1 }}

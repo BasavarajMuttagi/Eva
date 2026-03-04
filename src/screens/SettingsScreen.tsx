@@ -1,17 +1,43 @@
 import Icon, { Phosphor } from "@/src/components/Icon";
 import { db } from "@/src/db";
 import { userPreferences } from "@/src/db/schema";
-
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import React from "react";
-import { Pressable, Switch, Text, View } from "react-native";
+import { useRouter } from "expo-router";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  Switch,
+  Text,
+  View,
+} from "react-native";
 import { SignOutButton } from "../components/SignOutButton";
+import { apiClient } from "../lib/apiClient";
 import { authClient } from "../lib/auth-client";
+import { fetchAndSyncPreferences } from "../lib/sync";
+import { useOnboardingStatus } from "../store/OnboardingStatus";
+
+type ToggledPrefs = {
+  waterTrackingEnabled: boolean;
+  sleepTrackingEnabled: boolean;
+};
 
 export default function SettingsScreen() {
+  const router = useRouter();
   const { data: session } = authClient.useSession();
+  const setOnboardingComplete = useOnboardingStatus(
+    (s) => s.setOnboardingComplete,
+  );
   const userId = session?.user?.id;
+  const name = session?.user?.name;
+  const email = session?.user?.email;
+  const [refreshing, setRefreshing] = useState(false);
+  const [localPrefs, setLocalPrefs] = useState<ToggledPrefs>({
+    waterTrackingEnabled: false,
+    sleepTrackingEnabled: false,
+  });
 
   const { data: prefs } = useLiveQuery(
     db
@@ -23,126 +49,260 @@ export default function SettingsScreen() {
 
   const pref = prefs?.[0];
 
-  const toggle = async (
-    field: "waterTrackingEnabled" | "sleepTrackingEnabled",
-  ) => {
+  useEffect(() => {
+    if (!pref) return;
+    setLocalPrefs({
+      waterTrackingEnabled: pref.waterTrackingEnabled,
+      sleepTrackingEnabled: pref.sleepTrackingEnabled,
+    });
+  }, [pref?.waterTrackingEnabled, pref?.sleepTrackingEnabled]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchAndSyncPreferences();
+    setRefreshing(false);
+  }, []);
+
+  const toggle = (field: keyof ToggledPrefs) => {
     if (!userId) return;
-    const current = pref?.[field] ?? false;
-    await db
-      .insert(userPreferences)
-      .values({
-        userId,
-        [field]: !current,
-        // required notNull fields — use existing values or defaults
-        heightCm: pref?.heightCm ?? 170,
-        weightKg: pref?.weightKg ?? 70,
-        age: pref?.age ?? 25,
-        gender: pref?.gender ?? "other",
-        activityLevel: pref?.activityLevel ?? "sedentary",
-        waterTrackingEnabled:
-          field === "waterTrackingEnabled"
-            ? !current
-            : (pref?.waterTrackingEnabled ?? false),
-        sleepTrackingEnabled:
-          field === "sleepTrackingEnabled"
-            ? !current
-            : (pref?.sleepTrackingEnabled ?? false),
-      })
-      .onConflictDoUpdate({
-        target: userPreferences.userId,
-        set: { [field]: !current, updatedAt: new Date() },
+    const newValue = !localPrefs[field];
+
+    setLocalPrefs((prev) => ({ ...prev, [field]: newValue }));
+
+    apiClient
+      .patch("/api/preferences/toggles", { [field]: newValue })
+      .catch((err) => {
+        console.warn("[Settings] toggle failed, reverting", err);
+        setLocalPrefs((prev) => ({ ...prev, [field]: !newValue }));
       });
   };
 
   return (
-    <View className="flex-1 bg-screen-light dark:bg-screen-dark px-5">
-      <View className="gap-6 mt-10">
-        <Pressable className="py-4 border-b border-border-light dark:border-border-dark">
-          <Text className="text-text-primary-light dark:text-text-primary-dark text-base">
-            Body details
-          </Text>
-          <Text className="text-text-secondary-light dark:text-text-secondary-dark text-sm mt-1">
-            Height, weight, goals
-          </Text>
+    <ScrollView
+      className="flex-1 p-5 bg-screen-light dark:bg-screen-dark"
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+      showsVerticalScrollIndicator={false}
+    >
+      {/* Profile card */}
+      <View className="mb-6 items-center">
+        <View className="w-16 h-16 bg-chip-light dark:bg-chip-dark rounded-full items-center justify-center">
+          <Icon
+            icon={Phosphor.UserIcon}
+            size={24}
+            weight="fill"
+            className="text-text-secondary-light dark:text-text-secondary-dark"
+          />
+        </View>
+        <Text className="text-text-primary-light dark:text-text-primary-dark text-base font-semibold mt-3">
+          {name}
+        </Text>
+        <Text className="text-text-secondary-light dark:text-text-secondary-dark text-sm mt-0.5">
+          {email}
+        </Text>
+      </View>
+
+      <View className="gap-0">
+        {/* Profile */}
+        <Pressable
+          onPress={() => router.push("/(sheets)/profile")}
+          className="flex-row items-center justify-between py-4 border-b border-border-light dark:border-border-dark"
+        >
+          <View className="flex-1">
+            <View className="flex-row items-center gap-3">
+              <View className="bg-chip-light dark:bg-chip-dark p-2 rounded-full">
+                <View pointerEvents="none">
+                  <Icon
+                    icon={Phosphor.UserIcon}
+                    size={16}
+                    weight="fill"
+                    className="text-green-400"
+                  />
+                </View>
+              </View>
+              <View className="flex-1">
+                <Text className="text-text-primary-light dark:text-text-primary-dark text-base">
+                  Profile
+                </Text>
+                <Text className="text-text-secondary-light dark:text-text-secondary-dark text-sm mt-0.5">
+                  Height, weight, age & activity
+                </Text>
+              </View>
+            </View>
+          </View>
+          <Icon
+            icon={Phosphor.CaretRightIcon}
+            size={16}
+            weight="bold"
+            className="text-text-secondary-light dark:text-text-secondary-dark"
+          />
         </Pressable>
 
-        <Pressable className="py-4 border-b border-border-light dark:border-border-dark">
-          <Text className="text-text-primary-light dark:text-text-primary-dark text-base">
-            Notifications
-          </Text>
-          <Text className="text-text-secondary-light dark:text-text-secondary-dark text-sm mt-1">
-            Reminders & daily nudges
-          </Text>
-        </Pressable>
-
-        {/* Water Tracking Toggle */}
+        {/* Water Tracking */}
         <View className="flex-row items-center justify-between py-4 border-b border-border-light dark:border-border-dark">
           <View className="flex-1">
-            <View className="flex-row items-center gap-2">
-              <Icon
-                icon={Phosphor.DropIcon}
-                size={18}
-                weight="fill"
-                className="text-blue-400"
-              />
-              <Text className="text-text-primary-light dark:text-text-primary-dark text-base">
-                Water Tracking
-              </Text>
+            <View className="flex-row items-center gap-3">
+              <View className="bg-chip-light dark:bg-chip-dark p-2 rounded-full">
+                <View pointerEvents="none">
+                  <Icon
+                    icon={Phosphor.DropIcon}
+                    size={16}
+                    weight="fill"
+                    className="text-blue-400"
+                  />
+                </View>
+              </View>
+              <View className="flex-1">
+                <Text className="text-text-primary-light dark:text-text-primary-dark text-base">
+                  Water Tracking
+                </Text>
+                <Text className="text-text-secondary-light dark:text-text-secondary-dark text-sm mt-0.5">
+                  Log daily water intake
+                </Text>
+              </View>
             </View>
-            <Text className="text-text-secondary-light dark:text-text-secondary-dark text-sm mt-1">
-              Log daily water intake
-            </Text>
           </View>
           <Switch
-            value={pref?.waterTrackingEnabled ?? false}
+            value={localPrefs.waterTrackingEnabled}
             onValueChange={() => toggle("waterTrackingEnabled")}
           />
         </View>
 
-        {/* Sleep Tracking Toggle */}
+        {/* Sleep Tracking */}
         <View className="flex-row items-center justify-between py-4 border-b border-border-light dark:border-border-dark">
           <View className="flex-1">
-            <View className="flex-row items-center gap-2">
-              <Icon
-                icon={Phosphor.MoonIcon}
-                size={18}
-                weight="fill"
-                className="text-indigo-400"
-              />
-              <Text className="text-text-primary-light dark:text-text-primary-dark text-base">
-                Sleep Tracking
-              </Text>
+            <View className="flex-row items-center gap-3">
+              <View className="bg-chip-light dark:bg-chip-dark p-2 rounded-full">
+                <View pointerEvents="none">
+                  <Icon
+                    icon={Phosphor.MoonIcon}
+                    size={16}
+                    weight="fill"
+                    className="text-indigo-400"
+                  />
+                </View>
+              </View>
+              <View className="flex-1">
+                <Text className="text-text-primary-light dark:text-text-primary-dark text-base">
+                  Sleep Tracking
+                </Text>
+                <Text className="text-text-secondary-light dark:text-text-secondary-dark text-sm mt-0.5">
+                  Log nightly sleep duration
+                </Text>
+              </View>
             </View>
-            <Text className="text-text-secondary-light dark:text-text-secondary-dark text-sm mt-1">
-              Log nightly sleep duration
-            </Text>
           </View>
           <Switch
-            value={pref?.sleepTrackingEnabled ?? false}
+            value={localPrefs.sleepTrackingEnabled}
             onValueChange={() => toggle("sleepTrackingEnabled")}
           />
         </View>
 
-        <Pressable className="py-4 border-b border-border-light dark:border-border-dark">
-          <Text className="text-text-primary-light dark:text-text-primary-dark text-base">
-            Data & privacy
-          </Text>
-          <Text className="text-text-secondary-light dark:text-text-secondary-dark text-sm mt-1">
-            Export, delete, permissions
-          </Text>
+        {/* Food Logging Reminders - DUMMY */}
+        <View className="flex-row items-center justify-between py-4 border-b border-border-light dark:border-border-dark">
+          <View className="flex-1">
+            <View className="flex-row items-center gap-3">
+              <View className="bg-chip-light dark:bg-chip-dark p-2 rounded-full">
+                <View pointerEvents="none">
+                  <Icon
+                    icon={Phosphor.ClockIcon}
+                    size={16}
+                    weight="fill"
+                    className="text-orange-400"
+                  />
+                </View>
+              </View>
+              <View className="flex-1">
+                <Text className="text-text-primary-light dark:text-text-primary-dark text-base">
+                  Food Logging Reminders
+                </Text>
+                <Text className="text-text-secondary-light dark:text-text-secondary-dark text-sm mt-0.5">
+                  Nudge to log meals daily (coming soon)
+                </Text>
+              </View>
+            </View>
+          </View>
+          <Switch disabled value={false} />
+        </View>
+
+        {/* Data & Privacy */}
+        <Pressable className="flex-row items-center justify-between py-4 border-b border-border-light dark:border-border-dark">
+          <View className="flex-1">
+            <View className="flex-row items-center gap-3">
+              <View className="bg-chip-light dark:bg-chip-dark p-2 rounded-full">
+                <View pointerEvents="none">
+                  <Icon
+                    icon={Phosphor.KeyholeIcon}
+                    size={16}
+                    weight="fill"
+                    className="text-purple-400"
+                  />
+                </View>
+              </View>
+              <View className="flex-1">
+                <Text className="text-text-primary-light dark:text-text-primary-dark text-base">
+                  Data & Privacy
+                </Text>
+                <Text className="text-text-secondary-light dark:text-text-secondary-dark text-sm mt-0.5">
+                  Export, delete, permissions
+                </Text>
+              </View>
+            </View>
+          </View>
+          <Icon
+            icon={Phosphor.CaretRightIcon}
+            size={16}
+            weight="bold"
+            className="text-text-secondary-light dark:text-text-secondary-dark"
+          />
         </Pressable>
 
-        <Pressable className="py-4">
-          <Text className="text-text-primary-light dark:text-text-primary-dark text-base">
-            About Eva
-          </Text>
-          <Text className="text-text-secondary-light dark:text-text-secondary-dark text-sm mt-1">
-            Version, credits, support
-          </Text>
+        {/* About */}
+        <Pressable className="flex-row items-center justify-between py-4 border-b border-border-light dark:border-border-dark">
+          <View className="flex-1">
+            <View className="flex-row items-center gap-3">
+              <View className="bg-chip-light dark:bg-chip-dark p-2 rounded-full">
+                <View pointerEvents="none">
+                  <Icon
+                    icon={Phosphor.InfoIcon}
+                    size={16}
+                    weight="fill"
+                    className="text-gray-400"
+                  />
+                </View>
+              </View>
+              <View className="flex-1">
+                <Text className="text-text-primary-light dark:text-text-primary-dark text-base">
+                  About Eva
+                </Text>
+                <Text className="text-text-secondary-light dark:text-text-secondary-dark text-sm mt-0.5">
+                  Version, credits, support
+                </Text>
+              </View>
+            </View>
+          </View>
+          <Icon
+            icon={Phosphor.CaretRightIcon}
+            size={16}
+            weight="bold"
+            className="text-text-secondary-light dark:text-text-secondary-dark"
+          />
         </Pressable>
 
-        <SignOutButton />
+        {/* Reset + Sign out */}
+        <View className="mt-8 gap-3">
+          <Pressable
+            onPress={() => setOnboardingComplete(false)}
+            className="self-stretch rounded-full border border-border-light dark:border-border-dark py-3 px-6 items-center justify-center"
+          >
+            <Text className="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">
+              Reset onboarding
+            </Text>
+          </Pressable>
+          <SignOutButton />
+        </View>
       </View>
-    </View>
+    </ScrollView>
   );
 }
