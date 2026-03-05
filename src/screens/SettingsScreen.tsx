@@ -11,13 +11,13 @@ import {
   ScrollView,
   Switch,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
 import { SignOutButton } from "../components/SignOutButton";
 import { apiClient } from "../lib/apiClient";
 import { authClient } from "../lib/auth-client";
 import { fetchAndSyncPreferences } from "../lib/sync";
-import { useOnboardingStatus } from "../store/OnboardingStatus";
 
 type ToggledPrefs = {
   waterTrackingEnabled: boolean;
@@ -26,10 +26,7 @@ type ToggledPrefs = {
 
 export default function SettingsScreen() {
   const router = useRouter();
-  const { data: session } = authClient.useSession();
-  const setOnboardingComplete = useOnboardingStatus(
-    (s) => s.setOnboardingComplete,
-  );
+  const { data: session, refetch } = authClient.useSession();
   const userId = session?.user?.id;
   const name = session?.user?.name;
   const email = session?.user?.email;
@@ -292,16 +289,18 @@ export default function SettingsScreen() {
 
         {/* Reset + Sign out */}
         <View className="mt-8 gap-3">
-          <Pressable
-            onPress={() => setOnboardingComplete(false)}
+          <TouchableOpacity
+            onPress={async () => {
+              (await apiClient.post("/api/onboarding/reset"), await refetch());
+            }}
             className="self-stretch rounded-full border border-border-light dark:border-border-dark py-3 px-6 items-center justify-center"
           >
             <Text className="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">
               Reset onboarding
             </Text>
-          </Pressable>
-          <SignOutButton />
+          </TouchableOpacity>
         </View>
+        <SignOutButton />
       </View>
     </ScrollView>
   );

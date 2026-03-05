@@ -7,6 +7,7 @@ import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import { SQLiteProvider } from "expo-sqlite";
 import { StatusBar } from "expo-status-bar";
+
 import { ActivityIndicator, useColorScheme, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import "../../global.css";
@@ -14,15 +15,13 @@ import { AppServices } from "../components/AppServices";
 import { DbMigrations } from "../components/DbMigrations";
 import { OfflineBanner } from "../components/OfflineBanner";
 import { authClient } from "../lib/auth-client";
-import { useOnboardingStatus } from "../store/OnboardingStatus";
 import { EvaDarkTheme, EvaLightTheme } from "../theme/navigationTheme";
 
 function RootNavigator() {
-  const { data: session, isPending } = authClient.useSession();
+  const { data: session, isPending ,refetch} = authClient.useSession();
   const isLoggedIn = !!session;
-  const isOnboarding = useOnboardingStatus(
-    (state) => state.isOnboardingComplete,
-  );
+  const isOnboarded = (session?.user as any)?.isOnboarded ?? false;
+
   if (isPending) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -40,10 +39,10 @@ function RootNavigator() {
           animation: "default",
         }}
       >
-        <Stack.Protected guard={isLoggedIn && !isOnboarding}>
+        <Stack.Protected guard={isLoggedIn && !isOnboarded}>
           <Stack.Screen name="(onboarding)" />
         </Stack.Protected>
-        <Stack.Protected guard={isLoggedIn && isOnboarding}>
+        <Stack.Protected guard={isLoggedIn && isOnboarded}>
           <Stack.Screen name="index" />
           <Stack.Screen name="(tabs)" />
           <Stack.Screen

@@ -1,16 +1,14 @@
 import Icon, { Phosphor } from "@/src/components/Icon";
 import { apiClient } from "@/src/lib/apiClient";
+import { authClient } from "@/src/lib/auth-client";
 import { useOnboardingData } from "@/src/store/OnboardingData";
-import { useOnboardingStatus } from "@/src/store/OnboardingStatus";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 
 export default function EvasReadyScreen() {
   const router = useRouter();
-  const setOnboardingComplete = useOnboardingStatus(
-    (s) => s.setOnboardingComplete,
-  );
+  const { refetch } = authClient.useSession();
   const { heightCm, weightKg, age, gender, activityLevel, reset } =
     useOnboardingData();
   const [loading, setLoading] = useState(false);
@@ -30,7 +28,7 @@ export default function EvasReadyScreen() {
         sleepTrackingEnabled: false,
       });
       reset();
-      setOnboardingComplete(true);
+      await refetch(); // ← this is what you need
       router.replace("/(tabs)/today");
     } catch (err) {
       console.warn("[EvasReady] failed to save preferences", err);
