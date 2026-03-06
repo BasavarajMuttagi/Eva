@@ -1,5 +1,5 @@
-import { ACTIVITY_VALUES, GENDER_VALUES } from "@/src/db/schema";
 import { create } from "zustand";
+import { ACTIVITY_VALUES, GENDER_VALUES } from "./LogStore";
 
 type Gender = (typeof GENDER_VALUES)[number];
 type ActivityLevel = (typeof ACTIVITY_VALUES)[number];
