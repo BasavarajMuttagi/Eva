@@ -18,6 +18,7 @@ import { SignOutButton } from "../components/SignOutButton";
 type ToggledPrefs = {
   waterTrackingEnabled: boolean;
   sleepTrackingEnabled: boolean;
+  reminderEnabled: boolean;
 };
 
 export default function SettingsScreen() {
@@ -32,6 +33,7 @@ export default function SettingsScreen() {
   const [localPrefs, setLocalPrefs] = useState<ToggledPrefs>({
     waterTrackingEnabled: false,
     sleepTrackingEnabled: false,
+    reminderEnabled: false,
   });
 
   // fetch preferences on mount
@@ -43,6 +45,7 @@ export default function SettingsScreen() {
         setLocalPrefs({
           waterTrackingEnabled: res.data.waterTrackingEnabled,
           sleepTrackingEnabled: res.data.sleepTrackingEnabled,
+          reminderEnabled: res.data.reminderEnabled,
         });
       })
       .catch(() => {
@@ -192,7 +195,7 @@ export default function SettingsScreen() {
           />
         </View>
 
-        {/* Food Logging Reminders — coming soon */}
+        {/* Food Logging Reminders */}
         <View className="flex-row items-center justify-between py-4 border-b border-border-light dark:border-border-dark">
           <View className="flex-1">
             <View className="flex-row items-center gap-3">
@@ -211,12 +214,15 @@ export default function SettingsScreen() {
                   Food Logging Reminders
                 </Text>
                 <Text className="text-text-secondary-light dark:text-text-secondary-dark text-sm mt-0.5">
-                  Nudge to log meals daily (coming soon)
+                  Nudge to log meals daily
                 </Text>
               </View>
             </View>
           </View>
-          <Switch disabled value={false} />
+          <Switch
+            value={localPrefs.reminderEnabled}
+            onValueChange={() => toggle("reminderEnabled")}
+          />
         </View>
 
         {/* Data & Privacy */}
