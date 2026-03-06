@@ -5,20 +5,18 @@ import {
 import { ThemeProvider } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
-import { SQLiteProvider } from "expo-sqlite";
 import { StatusBar } from "expo-status-bar";
 
 import { ActivityIndicator, useColorScheme, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import "../../global.css";
 import { AppServices } from "../components/AppServices";
-import { DbMigrations } from "../components/DbMigrations";
 import { OfflineBanner } from "../components/OfflineBanner";
 import { authClient } from "../lib/auth-client";
 import { EvaDarkTheme, EvaLightTheme } from "../theme/navigationTheme";
 
 function RootNavigator() {
-  const { data: session, isPending ,refetch} = authClient.useSession();
+  const { data: session, isPending, refetch } = authClient.useSession();
   const isLoggedIn = !!session;
   const isOnboarded = (session?.user as any)?.isOnboarded ?? false;
 
@@ -48,9 +46,12 @@ function RootNavigator() {
           <Stack.Screen
             name="(sheets)"
             options={{
-              presentation: "fullScreenModal",
-              sheetGrabberVisible: true,
-              gestureEnabled: false,
+              presentation: "formSheet",
+              animation: "slide_from_bottom",
+              sheetCornerRadius: 30,
+              contentStyle: {
+                height: "100%",
+              },
             }}
           />
         </Stack.Protected>
@@ -78,11 +79,7 @@ export default function RootLayout() {
       <OfflineBanner />
       <SafeAreaProvider>
         <StatusBar style={isDark ? "light" : "dark"} />
-        <SQLiteProvider databaseName="db.db">
-          <DbMigrations>
-            <RootNavigator />
-          </DbMigrations>
-        </SQLiteProvider>
+        <RootNavigator />
       </SafeAreaProvider>
     </ThemeProvider>
   );

@@ -1,28 +1,19 @@
 import Icon, { Phosphor } from "@/src/components/Icon";
-import { db } from "@/src/db";
-import { foodLogs } from "@/src/db/schema";
-import { apiClient } from "@/src/lib/apiClient";
-import { eq } from "drizzle-orm";
+import { useLogStore } from "@/src/store/LogStore";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useCallback, useLayoutEffect, useState } from "react";
-import {
-  Pressable,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Pressable, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function EditLogScreen() {
-  const { id, rawText, version } = useLocalSearchParams<{
+  const { id, rawText } = useLocalSearchParams<{
     id: string;
     rawText: string;
-    version: string;
   }>();
 
   const router = useRouter();
   const navigation = useNavigation();
+  const { editLog } = useLogStore();
 
   const [text, setText] = useState(rawText ?? "");
   const [saving, setSaving] = useState(false);
@@ -31,54 +22,29 @@ export default function EditLogScreen() {
 
   const handleSave = useCallback(async () => {
     if (!hasChanged || saving) return;
-
     setSaving(true);
-    const now = new Date();
-    const newVersion = Number(version) + 1;
-
     try {
-      await db
-        .update(foodLogs)
-        .set({
-          rawText: text.trim(),
-          state: "pending",
-          syncedAt: null,
-          version: newVersion,
-          updatedAt: now,
-        })
-        .where(eq(foodLogs.id, id));
-
-      await apiClient.patch(`/api/log/${id}`, {
-        rawText: text.trim(),
-        version: newVersion,
-        updatedAt: now.getTime(),
-      });
-
-      await db
-        .update(foodLogs)
-        .set({ syncedAt: now })
-        .where(eq(foodLogs.id, id));
-
+      await editLog(id, text.trim());
       router.dismiss();
-    } catch (err) {
-      console.error("[EditLog] failed to save:", err);
+    } catch {
+      // editLog handles error state internally
     } finally {
       setSaving(false);
     }
-  }, [hasChanged, saving, text, version, id, router]);
+  }, [hasChanged, saving, text, id, router, editLog]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
         <Pressable
           onPress={() => router.dismiss()}
-          className="bg-chip-light dark:bg-chip-dark p-2 rounded-full"
+          className="bg-chip-light dark:bg-chip-dark p-2.5 rounded-full"
         >
           <View pointerEvents="none">
             <Icon
               icon={Phosphor.XIcon}
-              size={20}
-              weight="bold"
+              size={24}
+              weight="regular"
               className="text-text-primary-light dark:text-text-primary-dark"
             />
           </View>
@@ -93,32 +59,43 @@ export default function EditLogScreen() {
         </Text>
       ),
       headerRight: () => (
-        <TouchableOpacity
+        <Pressable
           onPress={handleSave}
           disabled={!hasChanged || saving}
-          className={`px-4 py-2 rounded-full ${
-            hasChanged && !saving
-              ? "bg-accent-light dark:bg-accent-dark"
-              : "bg-chip-light dark:bg-chip-dark"
-          }`}
+          className="bg-chip-light dark:bg-chip-dark p-2.5 rounded-full"
         >
-          <Text
-            className={`text-sm font-medium ${
-              hasChanged && !saving
-                ? "text-white"
-                : "text-text-secondary-light dark:text-text-secondary-dark"
-            }`}
-          >
-            {saving ? "Saving..." : "Save"}
-          </Text>
-        </TouchableOpacity>
+          <View pointerEvents="none">
+            {saving ? (
+              <Icon
+                icon={Phosphor.CircleNotchIcon}
+                size={24}
+                weight="regular"
+                className="text-text-primary-light dark:text-text-primary-dark"
+              />
+            ) : (
+              <Icon
+                icon={Phosphor.CheckIcon}
+                size={24}
+                weight="regular"
+                className={
+                  hasChanged
+                    ? "text-text-primary-light dark:text-text-primary-dark"
+                    : "text-text-secondary-light dark:text-text-secondary-dark opacity-40"
+                }
+              />
+            )}
+          </View>
+        </Pressable>
       ),
     });
   }, [navigation, hasChanged, saving, handleSave, router]);
 
   return (
-    <SafeAreaView className="flex-1">
-      <View className="flex-1 bg-screen-light dark:bg-screen-dark p-5">
+    <SafeAreaView
+      style={{ flex: 1 }}
+      className="bg-screen-light dark:bg-screen-dark"
+    >
+      <View className="flex-1 p-5">
         <TextInput
           value={text}
           onChangeText={setText}

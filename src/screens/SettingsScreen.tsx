@@ -1,8 +1,7 @@
 import Icon, { Phosphor } from "@/src/components/Icon";
-import { db } from "@/src/db";
-import { userPreferences } from "@/src/db/schema";
-import { eq } from "drizzle-orm";
-import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { apiClient } from "@/src/lib/apiClient";
+import { authClient } from "@/src/lib/auth-client";
+import { useLogStore } from "@/src/store/LogStore";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -15,9 +14,6 @@ import {
   View,
 } from "react-native";
 import { SignOutButton } from "../components/SignOutButton";
-import { apiClient } from "../lib/apiClient";
-import { authClient } from "../lib/auth-client";
-import { fetchAndSyncPreferences } from "../lib/sync";
 
 type ToggledPrefs = {
   waterTrackingEnabled: boolean;
@@ -30,33 +26,33 @@ export default function SettingsScreen() {
   const userId = session?.user?.id;
   const name = session?.user?.name;
   const email = session?.user?.email;
+  const { sync, clear } = useLogStore();
+
   const [refreshing, setRefreshing] = useState(false);
   const [localPrefs, setLocalPrefs] = useState<ToggledPrefs>({
     waterTrackingEnabled: false,
     sleepTrackingEnabled: false,
   });
 
-  const { data: prefs } = useLiveQuery(
-    db
-      .select()
-      .from(userPreferences)
-      .where(eq(userPreferences.userId, userId ?? "")),
-    [userId],
-  );
-
-  const pref = prefs?.[0];
-
+  // fetch preferences on mount
   useEffect(() => {
-    if (!pref) return;
-    setLocalPrefs({
-      waterTrackingEnabled: pref.waterTrackingEnabled,
-      sleepTrackingEnabled: pref.sleepTrackingEnabled,
-    });
-  }, [pref?.waterTrackingEnabled, pref?.sleepTrackingEnabled]);
+    if (!userId) return;
+    apiClient
+      .get("/api/preferences")
+      .then((res) => {
+        setLocalPrefs({
+          waterTrackingEnabled: res.data.waterTrackingEnabled,
+          sleepTrackingEnabled: res.data.sleepTrackingEnabled,
+        });
+      })
+      .catch(() => {
+        // 404 = not onboarded yet, stay at defaults
+      });
+  }, [userId]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await fetchAndSyncPreferences();
+    await sync();
     setRefreshing(false);
   }, []);
 
@@ -68,8 +64,8 @@ export default function SettingsScreen() {
 
     apiClient
       .patch("/api/preferences/toggles", { [field]: newValue })
-      .catch((err) => {
-        console.warn("[Settings] toggle failed, reverting", err);
+      .catch(() => {
+        // revert on failure
         setLocalPrefs((prev) => ({ ...prev, [field]: !newValue }));
       });
   };
@@ -196,7 +192,7 @@ export default function SettingsScreen() {
           />
         </View>
 
-        {/* Food Logging Reminders - DUMMY */}
+        {/* Food Logging Reminders — coming soon */}
         <View className="flex-row items-center justify-between py-4 border-b border-border-light dark:border-border-dark">
           <View className="flex-1">
             <View className="flex-row items-center gap-3">
@@ -291,7 +287,9 @@ export default function SettingsScreen() {
         <View className="mt-8 gap-3">
           <TouchableOpacity
             onPress={async () => {
-              (await apiClient.post("/api/onboarding/reset"), await refetch());
+              await apiClient.post("/api/onboarding/reset");
+              clear(); // wipe Zustand store
+              await refetch(); // update session isOnboarded → false
             }}
             className="self-stretch rounded-full border border-border-light dark:border-border-dark py-3 px-6 items-center justify-center"
           >

@@ -1,5 +1,5 @@
 import Icon, { Phosphor } from "@/src/components/Icon";
-import { ACTIVITY_VALUES } from "@/src/db/schema";
+import { ACTIVITY_VALUES } from "@/src/store/LogStore";
 import { useOnboardingData } from "@/src/store/OnboardingData";
 import { useRouter } from "expo-router";
 import React from "react";
@@ -43,8 +43,8 @@ export default function ActivityLevelScreen() {
         >
           <Icon
             icon={Phosphor.ArrowLeftIcon}
-            size={18}
-            weight="bold"
+            size={24}
+            weight="regular"
             className="text-text-primary-light dark:text-text-primary-dark"
           />
         </Pressable>
@@ -83,14 +83,6 @@ export default function ActivityLevelScreen() {
                   {item.subtitle}
                 </Text>
               </View>
-              {isSelected && (
-                <Icon
-                  icon={Phosphor.CheckIcon}
-                  size={18}
-                  weight="bold"
-                  className="text-accent-light dark:text-accent-dark"
-                />
-              )}
             </Pressable>
           );
         }}

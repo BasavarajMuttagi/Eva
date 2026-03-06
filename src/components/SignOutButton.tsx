@@ -1,12 +1,14 @@
 import Icon, { Phosphor } from "@/src/components/Icon";
+import { useLogStore } from "@/src/store/LogStore";
 import React from "react";
 import { Pressable, Text, View } from "react-native";
 import { authClient } from "../lib/auth-client";
-import { clearLocalDb } from "../lib/helper";
 
 export function SignOutButton() {
+  const { clear } = useLogStore();
+
   const handleSignOut = async () => {
-    clearLocalDb();
+    clear();
     await authClient.signOut();
   };
 

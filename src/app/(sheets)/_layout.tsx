@@ -5,37 +5,52 @@ export default function SheetLayout() {
   return (
     <Stack>
       <Stack.Screen
-        name="search"
+        name="history"
         options={{
-          headerTitle: "Search Logs",
-          animation: "slide_from_bottom",
           headerShadowVisible: false,
+          animation: "slide_from_bottom",
         }}
       />
       <Stack.Screen
-        name="edit-log"
+        name="day-logs"
         options={{
-          headerTitle: "Edit Log",
-          animation: "slide_from_bottom",
           headerShadowVisible: false,
-          sheetAllowedDetents: [0.5],
-          sheetGrabberVisible: true,
-        }}
-      />
-      <Stack.Screen
-        name="profile"
-        options={{
-          headerTitle: "Profile",
-          animation: "slide_from_bottom",
-          headerShadowVisible: false,
+          animation: "slide_from_right",
         }}
       />
       <Stack.Screen
         name="detailed-log"
         options={{
-          headerTitle: "DetailedLog",
-          animation: "slide_from_bottom",
           headerShadowVisible: false,
+          animation: "slide_from_right",
+        }}
+      />
+      <Stack.Screen
+        name="edit-log"
+        options={{
+          headerShadowVisible: false,
+          animation: "slide_from_bottom",
+        }}
+      />
+      <Stack.Screen
+        name="profile"
+        options={{
+          headerShadowVisible: false,
+          animation: "slide_from_bottom",
+        }}
+      />
+      <Stack.Screen
+        name="search"
+        options={{
+          headerShadowVisible: false,
+          animation: "slide_from_bottom",
+        }}
+      />
+      <Stack.Screen
+        name="today"
+        options={{
+          headerShadowVisible: false,
+          animation: "slide_from_bottom",
         }}
       />
     </Stack>

@@ -25,8 +25,8 @@ export default function HowEvaWorksScreen() {
         >
           <Icon
             icon={Phosphor.ArrowLeftIcon}
-            size={18}
-            weight="bold"
+            size={24}
+            weight="regular"
             className="text-text-primary-light dark:text-text-primary-dark"
           />
         </Pressable>

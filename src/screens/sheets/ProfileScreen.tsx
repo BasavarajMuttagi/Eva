@@ -1,18 +1,10 @@
 import Icon, { Phosphor } from "@/src/components/Icon";
-import { db } from "@/src/db";
-import {
-  ACTIVITY_VALUES,
-  GENDER_VALUES,
-  userPreferences,
-} from "@/src/db/schema";
 import { apiClient } from "@/src/lib/apiClient";
 import { authClient } from "@/src/lib/auth-client";
-import { fetchAndSyncPreferences } from "@/src/lib/sync";
+import { ACTIVITY_VALUES, GENDER_VALUES } from "@/src/store/LogStore";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { eq } from "drizzle-orm";
-import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useNavigation, useRouter } from "expo-router";
-import React, { useEffect, useLayoutEffect } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   Alert,
@@ -59,6 +51,16 @@ const ACTIVITY_LABELS: Record<(typeof ACTIVITY_VALUES)[number], string> = {
   very_active: "Very Active",
 };
 
+type Prefs = {
+  heightCm: number;
+  weightKg: number;
+  age: number;
+  gender: (typeof GENDER_VALUES)[number];
+  activityLevel: (typeof ACTIVITY_VALUES)[number];
+  waterTrackingEnabled: boolean;
+  sleepTrackingEnabled: boolean;
+};
+
 export default function ProfileScreen() {
   const router = useRouter();
   const navigation = useNavigation();
@@ -67,20 +69,14 @@ export default function ProfileScreen() {
   const name = session?.user?.name;
   const email = session?.user?.email;
 
-  const { data: prefs } = useLiveQuery(
-    db
-      .select()
-      .from(userPreferences)
-      .where(eq(userPreferences.userId, userId ?? "")),
-    [userId],
-  );
-  const pref = prefs?.[0];
+  const [prefs, setPrefs] = useState<Prefs | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const {
     control,
     handleSubmit,
     reset,
-    formState: { errors, isDirty, isSubmitting },
+    formState: { errors, isDirty },
   } = useForm<ProfileForm>({
     resolver: zodResolver(ProfileSchema),
     defaultValues: {
@@ -92,18 +88,42 @@ export default function ProfileScreen() {
     },
   });
 
+  const onSubmit = async (data: ProfileForm) => {
+    if (!userId) return;
+    setSaving(true);
+    try {
+      await apiClient.post("/api/preferences", {
+        heightCm: Number(data.heightCm),
+        weightKg: Number(data.weightKg),
+        age: Number(data.age),
+        gender: data.gender,
+        activityLevel: data.activityLevel,
+        waterTrackingEnabled: prefs?.waterTrackingEnabled ?? false,
+        sleepTrackingEnabled: prefs?.sleepTrackingEnabled ?? false,
+      });
+      router.dismiss();
+    } catch {
+      Alert.alert(
+        "Failed to save",
+        "Please check your connection and try again.",
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
   useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
         <Pressable
           onPress={() => router.dismiss()}
-          className="bg-chip-light dark:bg-chip-dark p-2 rounded-full"
+          className="bg-chip-light dark:bg-chip-dark p-2.5 rounded-full"
         >
           <View pointerEvents="none">
             <Icon
               icon={Phosphor.XIcon}
-              size={20}
-              weight="bold"
+              size={24}
+              weight="regular"
               className="text-text-primary-light dark:text-text-primary-dark"
             />
           </View>
@@ -117,56 +137,64 @@ export default function ProfileScreen() {
           Profile
         </Text>
       ),
+      headerRight: () => (
+        <Pressable
+          onPress={handleSubmit(onSubmit)}
+          disabled={!isDirty || saving}
+          className="bg-chip-light dark:bg-chip-dark p-2.5 rounded-full"
+        >
+          <View pointerEvents="none">
+            {saving ? (
+              <Icon
+                icon={Phosphor.CircleNotchIcon}
+                size={24}
+                weight="regular"
+                className="text-text-primary-light dark:text-text-primary-dark"
+              />
+            ) : (
+              <Icon
+                icon={Phosphor.CheckIcon}
+                size={24}
+                weight="regular"
+                className={
+                  isDirty
+                    ? "text-text-primary-light dark:text-text-primary-dark"
+                    : "text-text-secondary-light dark:text-text-secondary-dark opacity-40"
+                }
+              />
+            )}
+          </View>
+        </Pressable>
+      ),
     });
-  }, [navigation, router]);
+  }, [navigation, router, isDirty, saving, handleSubmit]);
 
   useEffect(() => {
-    if (!pref) return;
-    reset({
-      heightCm: pref.heightCm ? String(pref.heightCm) : "",
-      weightKg: pref.weightKg ? String(pref.weightKg) : "",
-      age: pref.age ? String(pref.age) : "",
-      gender: pref.gender,
-      activityLevel: pref.activityLevel,
-    });
-  }, [
-    pref?.heightCm,
-    pref?.weightKg,
-    pref?.age,
-    pref?.gender,
-    pref?.activityLevel,
-  ]);
-
-  const onSubmit = async (data: ProfileForm) => {
     if (!userId) return;
-    try {
-      await apiClient.post("/api/preferences", {
-        heightCm: Number(data.heightCm),
-        weightKg: Number(data.weightKg),
-        age: Number(data.age),
-        gender: data.gender,
-        activityLevel: data.activityLevel,
-        waterTrackingEnabled: pref?.waterTrackingEnabled ?? false,
-        sleepTrackingEnabled: pref?.sleepTrackingEnabled ?? false,
+    apiClient
+      .get("/api/preferences")
+      .then((res) => {
+        setPrefs(res.data);
+        reset({
+          heightCm: String(res.data.heightCm),
+          weightKg: String(res.data.weightKg),
+          age: String(res.data.age),
+          gender: res.data.gender,
+          activityLevel: res.data.activityLevel,
+        });
+      })
+      .catch(() => {
+        // 404 = not onboarded yet
       });
-      await fetchAndSyncPreferences();
-      router.dismiss();
-    } catch (err) {
-      console.warn("[Profile] save failed", err);
-      Alert.alert(
-        "Failed to save",
-        "Please check your connection and try again.",
-      );
-    }
-  };
+  }, [userId]);
 
   return (
     <KeyboardAvoidingView
-      className="flex-1 bg-screen-light dark:bg-screen-dark"
+      style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <ScrollView
-        className="flex-1"
+        className="flex-1 bg-screen-light dark:bg-screen-dark"
         contentContainerClassName="px-6 pt-6 pb-16"
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -331,29 +359,8 @@ export default function ProfileScreen() {
           />
         </View>
 
-        {/* Save */}
-        <Pressable
-          onPress={handleSubmit(onSubmit)}
-          disabled={!isDirty || isSubmitting}
-          className={`py-3 rounded-full items-center ${
-            isDirty && !isSubmitting
-              ? "bg-text-primary-light dark:bg-text-primary-dark"
-              : "bg-border-light dark:bg-border-dark"
-          }`}
-        >
-          <Text
-            className={`text-base font-semibold ${
-              isDirty && !isSubmitting
-                ? "text-screen-light dark:text-screen-dark"
-                : "text-text-secondary-light dark:text-text-secondary-dark"
-            }`}
-          >
-            {isSubmitting ? "Saving..." : "Save"}
-          </Text>
-        </Pressable>
-
         {/* Nudge */}
-        <View className="flex-row items-start gap-2 mt-8 px-1">
+        <View className="flex-row items-start gap-2 px-1">
           <Icon
             icon={Phosphor.WarningCircleIcon}
             size={14}

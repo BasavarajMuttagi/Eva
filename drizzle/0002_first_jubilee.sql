@@ -1,1 +1,0 @@
-ALTER TABLE `food_logs` RENAME COLUMN "description" TO "explanation";

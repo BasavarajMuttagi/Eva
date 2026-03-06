@@ -1,27 +1,29 @@
 import Icon, { Phosphor } from "@/src/components/Icon";
-import { db } from "@/src/db";
-import { foodLogItems, foodLogs } from "@/src/db/schema";
-import { eq } from "drizzle-orm";
-import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { useLogStore } from "@/src/store/LogStore";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import React, { useLayoutEffect } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 
 export default function DetailedLogScreen() {
   const router = useRouter();
   const navigation = useNavigation();
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const { logs } = useLogStore();
+
+  const log = logs.find((l) => l.id === id);
+
   useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
         <Pressable
           onPress={() => router.dismiss()}
-          className="bg-chip-light dark:bg-chip-dark p-2 rounded-full"
+          className="bg-chip-light dark:bg-chip-dark p-2.5 rounded-full"
         >
           <View pointerEvents="none">
             <Icon
               icon={Phosphor.XIcon}
-              size={20}
-              weight="bold"
+              size={24}
+              weight="regular"
               className="text-text-primary-light dark:text-text-primary-dark"
             />
           </View>
@@ -35,18 +37,38 @@ export default function DetailedLogScreen() {
           Log Details
         </Text>
       ),
+      headerRight: () => {
+        if (log?.state === "processing") {
+          Alert.alert("Still processing", "Please wait before editing.");
+          return null;
+        }
+        return (
+          <Pressable
+            onPress={() =>
+              router.push({
+                pathname: "/(sheets)/edit-log",
+                params: {
+                  id: log?.id,
+                  rawText: log?.rawText,
+                  version: String(log?.version),
+                },
+              })
+            }
+            className="bg-chip-light dark:bg-chip-dark p-2.5 rounded-full"
+          >
+            <View pointerEvents="none">
+              <Icon
+                icon={Phosphor.PencilSimpleLineIcon}
+                size={24}
+                weight="fill"
+                className="text-text-primary-light dark:text-text-primary-dark"
+              />
+            </View>
+          </Pressable>
+        );
+      },
     });
   }, [navigation, router]);
-  const { id } = useLocalSearchParams<{ id: string }>();
-
-  const { data: logs = [] } = useLiveQuery(
-    db.select().from(foodLogs).where(eq(foodLogs.id, id)),
-  );
-  const log = logs[0];
-
-  const { data: items = [] } = useLiveQuery(
-    db.select().from(foodLogItems).where(eq(foodLogItems.logId, id)),
-  );
 
   if (!log) return null;
 
@@ -133,7 +155,7 @@ export default function DetailedLogScreen() {
       )}
 
       {/* Breakdown */}
-      {items.length > 0 && (
+      {log.items.length > 0 && (
         <View className="mt-10">
           <View className="flex-row items-center gap-2 mb-4">
             <Icon
@@ -148,7 +170,7 @@ export default function DetailedLogScreen() {
           </View>
 
           <View>
-            {items.map((item, index) => (
+            {log.items.map((item, index) => (
               <View key={item.id}>
                 <View className="py-4">
                   <View className="flex-row items-center justify-between mb-1">
@@ -194,7 +216,7 @@ export default function DetailedLogScreen() {
                   </View>
                 </View>
 
-                {index < items.length - 1 && (
+                {index < log.items.length - 1 && (
                   <View className="h-px bg-border-light dark:bg-border-dark" />
                 )}
               </View>

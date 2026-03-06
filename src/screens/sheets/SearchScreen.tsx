@@ -14,13 +14,13 @@ export default function SearchScreen() {
       headerLeft: () => (
         <Pressable
           onPress={() => router.dismiss()}
-          className="bg-chip-light dark:bg-chip-dark p-2 rounded-full"
+          className="bg-chip-light dark:bg-chip-dark p-2.5 rounded-full"
         >
           <View pointerEvents="none">
             <Icon
               icon={Phosphor.XIcon}
-              size={20}
-              weight="bold"
+              size={24}
+              weight="regular"
               className="text-text-primary-light dark:text-text-primary-dark"
             />
           </View>

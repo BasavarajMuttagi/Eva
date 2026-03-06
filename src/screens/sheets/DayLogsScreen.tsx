@@ -3,14 +3,13 @@ import { apiClient } from "@/src/lib/apiClient";
 import { authClient } from "@/src/lib/auth-client";
 import type { FoodLog } from "@/src/store/LogStore";
 import { useLogStore } from "@/src/store/LogStore";
-import { isToday } from "date-fns";
-import { useNavigation, useRouter } from "expo-router";
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { format, isYesterday } from "date-fns";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import {
   Alert,
   FlatList,
   Pressable,
-  RefreshControl,
   Text,
   TextInput,
   TouchableOpacity,
@@ -20,33 +19,52 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Swipeable, {
   SwipeableMethods,
 } from "react-native-gesture-handler/ReanimatedSwipeable";
-import "react-native-get-random-values";
 import { SharedValue } from "react-native-reanimated";
-import { v4 as uuidv4 } from "uuid";
+
+function formatDayTitle(dateStr: string): string {
+  const date = new Date(dateStr);
+  if (isYesterday(date)) return "Yesterday";
+  return format(date, "EEE, MMM d");
+}
+
 function RightActions({
   dragX,
   item,
   deletingId,
+  onEdit,
   onDelete,
 }: {
   dragX: SharedValue<number>;
   item: FoodLog;
   deletingId: string | null;
+  onEdit: (log: FoodLog) => void;
   onDelete: (id: string) => void;
 }) {
   return (
-    <View className="w-[80px] flex-row items-center pl-2 pr-1">
+    <View className="w-[180px] flex-row items-center pl-2 pr-1 gap-2">
+      <TouchableOpacity
+        onPress={() => onEdit(item)}
+        className="flex-1 h-full bg-blue-500 justify-center items-center gap-1 rounded-md"
+      >
+        <Icon
+          icon={Phosphor.PencilSimpleLineIcon}
+          size={18}
+          weight="bold"
+          className="text-white"
+        />
+      </TouchableOpacity>
+
       <TouchableOpacity
         onPress={() => onDelete(item.id)}
         disabled={deletingId === item.id}
-        className="flex-1 h-full bg-red-500 justify-center items-center rounded-md"
+        className="flex-1 h-full bg-red-500 justify-center items-center gap-1 rounded-md"
       >
         {deletingId === item.id ? (
           <Icon
             icon={Phosphor.SpinnerGapIcon}
             size={18}
             weight="bold"
-            className="text-white"
+            className="text-white p-2"
           />
         ) : (
           <Icon
@@ -65,11 +83,13 @@ function SwipeableRow({
   item,
   deletingId,
   renderRight,
+  onEdit,
   onDelete,
 }: {
   item: FoodLog;
   deletingId: string | null;
   renderRight: (log: FoodLog) => React.ReactNode;
+  onEdit: (log: FoodLog, close: () => void) => void;
   onDelete: (id: string, close: () => void) => void;
 }) {
   const router = useRouter();
@@ -86,6 +106,7 @@ function SwipeableRow({
           dragX={dragX}
           item={item}
           deletingId={deletingId}
+          onEdit={(log) => onEdit(log, close)}
           onDelete={(id) => onDelete(id, close)}
         />
       )}
@@ -111,36 +132,34 @@ function SwipeableRow({
   );
 }
 
-export default function TodayScreen() {
+export default function DayLogsScreen() {
   const router = useRouter();
+  const navigation = useNavigation();
+  const { date } = useLocalSearchParams<{ date: string }>();
   const { data: session } = authClient.useSession();
   const userId = session?.user?.id ?? "";
-  const navigation = useNavigation();
-  const {
-    logs = [],
-    sync,
-    syncing,
-    addLog,
-    retryLog,
-    removeLog,
-  } = useLogStore();
 
-  const todayLogs = logs.filter((l) => isToday(new Date(l.createdAt)));
+  const { logs, retryLog, removeLog, addLog } = useLogStore();
+
+  const dayLogs = logs.filter(
+    (l) => format(new Date(l.createdAt), "yyyy-MM-dd") === date,
+  );
 
   const [input, setInput] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useLayoutEffect(() => {
     navigation.setOptions({
+      animation: "slide_from_bottom",
+      headerShadowVisible: false,
       headerLeft: () => (
         <Pressable
-          style={{ marginLeft: 8 }}
-          onPress={() => router.push("/(sheets)/history")}
+          onPress={() => router.dismiss()}
           className="bg-chip-light dark:bg-chip-dark p-2.5 rounded-full"
         >
           <View pointerEvents="none">
             <Icon
-              icon={Phosphor.ClockCounterClockwiseIcon}
+              icon={Phosphor.XIcon}
               size={24}
               weight="regular"
               className="text-text-primary-light dark:text-text-primary-dark"
@@ -148,20 +167,20 @@ export default function TodayScreen() {
           </View>
         </Pressable>
       ),
+      headerTitle: () => (
+        <Text
+          style={{ fontFamily: "LibreBaskerville_700Bold", fontSize: 24 }}
+          className="text-text-primary-light dark:text-text-primary-dark"
+        >
+          {date ? formatDayTitle(date) : ""}
+        </Text>
+      ),
     });
-  }, [navigation, router]);
-
-  useEffect(() => {
-    sync();
-  }, []);
-
-  const onRefresh = async () => {
-    await sync();
-  };
+  }, [navigation, router, date]);
 
   const handleAdd = async () => {
     if (!input.trim()) return;
-    const id = uuidv4();
+    const id = crypto.randomUUID();
     setInput("");
     await addLog(id, input.trim(), userId);
   };
@@ -190,6 +209,22 @@ export default function TodayScreen() {
         },
       },
     ]);
+  };
+
+  const handleEdit = (log: FoodLog, close?: () => void) => {
+    if (log.state === "processing") {
+      Alert.alert("Still processing", "Please wait before editing.");
+      return;
+    }
+    close?.();
+    router.push({
+      pathname: "/(sheets)/edit-log",
+      params: {
+        id: log.id,
+        rawText: log.rawText,
+        version: String(log.version),
+      },
+    });
   };
 
   const renderRight = (log: FoodLog) => {
@@ -247,6 +282,7 @@ export default function TodayScreen() {
       item={item}
       deletingId={deletingId}
       renderRight={renderRight}
+      onEdit={handleEdit}
       onDelete={handleDelete}
     />
   );
@@ -280,44 +316,25 @@ export default function TodayScreen() {
         </View>
 
         <FlatList
-          data={todayLogs}
+          data={dayLogs}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
           contentContainerStyle={{ paddingBottom: 40, flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl refreshing={syncing} onRefresh={onRefresh} />
-          }
           ListEmptyComponent={
             <View className="flex-1 items-center justify-center gap-3">
-              {syncing ? (
-                <>
-                  <Icon
-                    icon={Phosphor.SparkleIcon}
-                    size={32}
-                    weight="fill"
-                    className="text-accent-light dark:text-accent-dark opacity-40"
-                  />
-                  <Text className="text-text-secondary-light dark:text-text-secondary-dark text-sm">
-                    Loading...
-                  </Text>
-                </>
-              ) : (
-                <>
-                  <Icon
-                    icon={Phosphor.ForkKnifeIcon}
-                    size={32}
-                    weight="duotone"
-                    className="text-text-secondary-light dark:text-text-secondary-dark opacity-40"
-                  />
-                  <Text className="text-text-primary-light dark:text-text-primary-dark text-base font-medium">
-                    Nothing logged yet
-                  </Text>
-                  <Text className="text-text-secondary-light dark:text-text-secondary-dark text-sm text-center px-8">
-                    Type what you ate above and tap Add
-                  </Text>
-                </>
-              )}
+              <Icon
+                icon={Phosphor.ForkKnifeIcon}
+                size={32}
+                weight="duotone"
+                className="text-text-secondary-light dark:text-text-secondary-dark opacity-40"
+              />
+              <Text className="text-text-primary-light dark:text-text-primary-dark text-base font-medium">
+                Nothing logged
+              </Text>
+              <Text className="text-text-secondary-light dark:text-text-secondary-dark text-sm text-center px-8">
+                No entries found for this day
+              </Text>
             </View>
           }
         />

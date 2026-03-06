@@ -1,17 +1,8 @@
 import HeaderTitle from "@/src/components/HeaderTitle";
 import Icon, { Phosphor } from "@/src/components/Icon";
-import { useSyncEngine } from "@/src/lib/useSyncEngine";
-import { useWebSocket } from "@/src/lib/useWebSocket";
-import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
 import { Tabs } from "expo-router";
-import { useSQLiteContext } from "expo-sqlite";
 
 export default function TabLayout() {
-  const expoDb = useSQLiteContext();
-  useDrizzleStudio(expoDb);
-  useSyncEngine();
-  useWebSocket();
-
   return (
     <Tabs
       screenOptions={{

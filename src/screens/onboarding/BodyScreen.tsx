@@ -1,5 +1,5 @@
 import Icon, { Phosphor } from "@/src/components/Icon";
-import { GENDER_VALUES } from "@/src/db/schema";
+import { GENDER_VALUES } from "@/src/store/LogStore";
 import { useOnboardingData } from "@/src/store/OnboardingData";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -71,8 +71,8 @@ export default function BodyScreen() {
           >
             <Icon
               icon={Phosphor.ArrowLeftIcon}
-              size={18}
-              weight="bold"
+              size={24}
+              weight="regular"
               className="text-text-primary-light dark:text-text-primary-dark"
             />
           </Pressable>
