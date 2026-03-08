@@ -6,19 +6,18 @@ import { Pressable, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function EditLogScreen() {
-  const { id, rawText } = useLocalSearchParams<{
-    id: string;
-    rawText: string;
-  }>();
+  const { id } = useLocalSearchParams<{ id: string }>();
 
   const router = useRouter();
   const navigation = useNavigation();
-  const { editLog } = useLogStore();
+  const { editLog, logs } = useLogStore();
 
-  const [text, setText] = useState(rawText ?? "");
+  const log = logs.find((l) => l.id === id);
+
+  const [text, setText] = useState(log?.rawText ?? "");
   const [saving, setSaving] = useState(false);
 
-  const hasChanged = text.trim() !== rawText?.trim();
+  const hasChanged = text.trim() !== log?.rawText?.trim();
 
   const handleSave = useCallback(async () => {
     if (!hasChanged || saving) return;
@@ -70,7 +69,7 @@ export default function EditLogScreen() {
                 icon={Phosphor.CircleNotchIcon}
                 size={24}
                 weight="regular"
-                className="text-text-primary-light dark:text-text-primary-dark"
+                className="text-text-primary-light animate-spin dark:text-text-primary-dark"
               />
             ) : (
               <Icon
@@ -89,6 +88,8 @@ export default function EditLogScreen() {
       ),
     });
   }, [navigation, hasChanged, saving, handleSave, router]);
+
+  if (!log) return null;
 
   return (
     <SafeAreaView

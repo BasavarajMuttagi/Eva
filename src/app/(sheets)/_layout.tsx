@@ -15,14 +15,14 @@ export default function SheetLayout() {
         name="day-logs"
         options={{
           headerShadowVisible: false,
-          animation: "slide_from_right",
+          animation: "slide_from_bottom",
         }}
       />
       <Stack.Screen
         name="detailed-log"
         options={{
           headerShadowVisible: false,
-          animation: "slide_from_right",
+          animation: "slide_from_bottom",
         }}
       />
       <Stack.Screen
@@ -48,6 +48,13 @@ export default function SheetLayout() {
       />
       <Stack.Screen
         name="today"
+        options={{
+          headerShadowVisible: false,
+          animation: "slide_from_bottom",
+        }}
+      />
+      <Stack.Screen
+        name="log-past-day"
         options={{
           headerShadowVisible: false,
           animation: "slide_from_bottom",

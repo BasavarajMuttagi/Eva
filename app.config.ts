@@ -38,6 +38,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ],
     "expo-font",
     "expo-secure-store",
+    "@react-native-community/datetimepicker",
   ],
   experiments: {
     typedRoutes: true,

@@ -101,14 +101,14 @@ export default function HistoryScreen() {
       ),
       headerRight: () => (
         <Pressable
-          onPress={() => router.dismiss()}
+          onPress={() => router.push("/(sheets)/log-past-day")}
           className="bg-chip-light dark:bg-chip-dark p-2.5 rounded-full"
         >
           <View pointerEvents="none">
             <Icon
-              icon={Phosphor.MagnifyingGlassIcon}
+              icon={Phosphor.CalendarPlusIcon}
               size={24}
-              weight="regular"
+              weight="duotone"
               className="text-text-primary-light dark:text-text-primary-dark"
             />
           </View>

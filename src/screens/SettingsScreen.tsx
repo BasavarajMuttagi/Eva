@@ -1,77 +1,33 @@
 import Icon, { Phosphor } from "@/src/components/Icon";
-import { apiClient } from "@/src/lib/apiClient";
 import { authClient } from "@/src/lib/auth-client";
 import { useLogStore } from "@/src/store/LogStore";
 import { useRouter } from "expo-router";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   Pressable,
   RefreshControl,
   ScrollView,
-  Switch,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 import { SignOutButton } from "../components/SignOutButton";
-
-type ToggledPrefs = {
-  waterTrackingEnabled: boolean;
-  sleepTrackingEnabled: boolean;
-  reminderEnabled: boolean;
-};
+import { apiClient } from "../lib/apiClient";
 
 export default function SettingsScreen() {
   const router = useRouter();
   const { data: session, refetch } = authClient.useSession();
-  const userId = session?.user?.id;
   const name = session?.user?.name;
   const email = session?.user?.email;
   const { sync, clear } = useLogStore();
 
   const [refreshing, setRefreshing] = useState(false);
-  const [localPrefs, setLocalPrefs] = useState<ToggledPrefs>({
-    waterTrackingEnabled: false,
-    sleepTrackingEnabled: false,
-    reminderEnabled: false,
-  });
-
-  // fetch preferences on mount
-  useEffect(() => {
-    if (!userId) return;
-    apiClient
-      .get("/api/preferences")
-      .then((res) => {
-        setLocalPrefs({
-          waterTrackingEnabled: res.data.waterTrackingEnabled,
-          sleepTrackingEnabled: res.data.sleepTrackingEnabled,
-          reminderEnabled: res.data.reminderEnabled,
-        });
-      })
-      .catch(() => {
-        // 404 = not onboarded yet, stay at defaults
-      });
-  }, [userId]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await sync();
     setRefreshing(false);
   }, []);
-
-  const toggle = (field: keyof ToggledPrefs) => {
-    if (!userId) return;
-    const newValue = !localPrefs[field];
-
-    setLocalPrefs((prev) => ({ ...prev, [field]: newValue }));
-
-    apiClient
-      .patch("/api/preferences/toggles", { [field]: newValue })
-      .catch(() => {
-        // revert on failure
-        setLocalPrefs((prev) => ({ ...prev, [field]: !newValue }));
-      });
-  };
 
   return (
     <ScrollView
@@ -134,96 +90,6 @@ export default function SettingsScreen() {
             className="text-text-secondary-light dark:text-text-secondary-dark"
           />
         </Pressable>
-
-        {/* Water Tracking */}
-        <View className="flex-row items-center justify-between py-4 border-b border-border-light dark:border-border-dark">
-          <View className="flex-1">
-            <View className="flex-row items-center gap-3">
-              <View className="bg-chip-light dark:bg-chip-dark p-2 rounded-full">
-                <View pointerEvents="none">
-                  <Icon
-                    icon={Phosphor.DropIcon}
-                    size={16}
-                    weight="fill"
-                    className="text-blue-400"
-                  />
-                </View>
-              </View>
-              <View className="flex-1">
-                <Text className="text-text-primary-light dark:text-text-primary-dark text-base">
-                  Water Tracking
-                </Text>
-                <Text className="text-text-secondary-light dark:text-text-secondary-dark text-sm mt-0.5">
-                  Log daily water intake
-                </Text>
-              </View>
-            </View>
-          </View>
-          <Switch
-            value={localPrefs.waterTrackingEnabled}
-            onValueChange={() => toggle("waterTrackingEnabled")}
-          />
-        </View>
-
-        {/* Sleep Tracking */}
-        <View className="flex-row items-center justify-between py-4 border-b border-border-light dark:border-border-dark">
-          <View className="flex-1">
-            <View className="flex-row items-center gap-3">
-              <View className="bg-chip-light dark:bg-chip-dark p-2 rounded-full">
-                <View pointerEvents="none">
-                  <Icon
-                    icon={Phosphor.MoonIcon}
-                    size={16}
-                    weight="fill"
-                    className="text-indigo-400"
-                  />
-                </View>
-              </View>
-              <View className="flex-1">
-                <Text className="text-text-primary-light dark:text-text-primary-dark text-base">
-                  Sleep Tracking
-                </Text>
-                <Text className="text-text-secondary-light dark:text-text-secondary-dark text-sm mt-0.5">
-                  Log nightly sleep duration
-                </Text>
-              </View>
-            </View>
-          </View>
-          <Switch
-            value={localPrefs.sleepTrackingEnabled}
-            onValueChange={() => toggle("sleepTrackingEnabled")}
-          />
-        </View>
-
-        {/* Food Logging Reminders */}
-        <View className="flex-row items-center justify-between py-4 border-b border-border-light dark:border-border-dark">
-          <View className="flex-1">
-            <View className="flex-row items-center gap-3">
-              <View className="bg-chip-light dark:bg-chip-dark p-2 rounded-full">
-                <View pointerEvents="none">
-                  <Icon
-                    icon={Phosphor.ClockIcon}
-                    size={16}
-                    weight="fill"
-                    className="text-orange-400"
-                  />
-                </View>
-              </View>
-              <View className="flex-1">
-                <Text className="text-text-primary-light dark:text-text-primary-dark text-base">
-                  Food Logging Reminders
-                </Text>
-                <Text className="text-text-secondary-light dark:text-text-secondary-dark text-sm mt-0.5">
-                  Nudge to log meals daily
-                </Text>
-              </View>
-            </View>
-          </View>
-          <Switch
-            value={localPrefs.reminderEnabled}
-            onValueChange={() => toggle("reminderEnabled")}
-          />
-        </View>
 
         {/* Data & Privacy */}
         <Pressable className="flex-row items-center justify-between py-4 border-b border-border-light dark:border-border-dark">
@@ -288,24 +154,23 @@ export default function SettingsScreen() {
             className="text-text-secondary-light dark:text-text-secondary-dark"
           />
         </Pressable>
-
-        {/* Reset + Sign out */}
-        <View className="mt-8 gap-3">
-          <TouchableOpacity
-            onPress={async () => {
-              await apiClient.post("/api/onboarding/reset");
-              clear(); // wipe Zustand store
-              await refetch(); // update session isOnboarded → false
-            }}
-            className="self-stretch rounded-full border border-border-light dark:border-border-dark py-3 px-6 items-center justify-center"
-          >
-            <Text className="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">
-              Reset onboarding
-            </Text>
-          </TouchableOpacity>
-        </View>
-        <SignOutButton />
       </View>
+      {/* Reset + Sign out */}
+      <View className="mt-8 gap-3">
+        <TouchableOpacity
+          onPress={async () => {
+            await apiClient.post("/api/onboarding/reset");
+            clear(); // wipe Zustand store
+            await refetch(); // update session isOnboarded → false
+          }}
+          className="self-stretch rounded-full border border-border-light dark:border-border-dark py-3 px-6 items-center justify-center"
+        >
+          <Text className="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">
+            Reset onboarding
+          </Text>
+        </TouchableOpacity>
+      </View>
+      <SignOutButton />
     </ScrollView>
   );
 }

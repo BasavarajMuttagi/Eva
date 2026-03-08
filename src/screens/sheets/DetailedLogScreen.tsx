@@ -38,22 +38,18 @@ export default function DetailedLogScreen() {
         </Text>
       ),
       headerRight: () => {
-        if (log?.state === "processing") {
-          Alert.alert("Still processing", "Please wait before editing.");
-          return null;
-        }
         return (
           <Pressable
-            onPress={() =>
+            onPress={() => {
+              if (log?.state === "processing") {
+                Alert.alert("Still processing", "Please wait before editing.");
+                return;
+              }
               router.push({
                 pathname: "/(sheets)/edit-log",
-                params: {
-                  id: log?.id,
-                  rawText: log?.rawText,
-                  version: String(log?.version),
-                },
-              })
-            }
+                params: { id: log?.id }, // ← only id, nothing else
+              });
+            }}
             className="bg-chip-light dark:bg-chip-dark p-2.5 rounded-full"
           >
             <View pointerEvents="none">
@@ -68,7 +64,7 @@ export default function DetailedLogScreen() {
         );
       },
     });
-  }, [navigation, router]);
+  }, [navigation, router, log]);
 
   if (!log) return null;
 

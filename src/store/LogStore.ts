@@ -58,7 +58,12 @@ type LogStore = {
   upsertLog: (log: Partial<FoodLog> & { id: string }) => void;
   removeLog: (id: string) => void;
   clear: () => void;
-  addLog: (id: string, rawText: string, userId: string) => Promise<void>;
+  addLog: (
+    id: string,
+    rawText: string,
+    userId: string,
+    createdAt?: string,
+  ) => Promise<void>;
   retryLog: (id: string) => Promise<void>;
   editLog: (id: string, rawText: string) => Promise<void>;
 };
@@ -113,8 +118,8 @@ export const useLogStore = create<LogStore>((set, get) => ({
       syncing: false,
     }),
 
-  addLog: async (id, rawText, userId) => {
-    const now = new Date().toISOString();
+  addLog: async (id, rawText, userId, createdAt) => {
+    const now = createdAt ?? new Date().toISOString();
 
     get().upsertLog({
       id,

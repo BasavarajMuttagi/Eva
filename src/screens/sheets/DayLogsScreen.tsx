@@ -19,8 +19,9 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Swipeable, {
   SwipeableMethods,
 } from "react-native-gesture-handler/ReanimatedSwipeable";
+import "react-native-get-random-values";
 import { SharedValue } from "react-native-reanimated";
-
+import { v4 as uuidv4 } from "uuid";
 function formatDayTitle(dateStr: string): string {
   const date = new Date(dateStr);
   if (isYesterday(date)) return "Yesterday";
@@ -180,9 +181,12 @@ export default function DayLogsScreen() {
 
   const handleAdd = async () => {
     if (!input.trim()) return;
-    const id = crypto.randomUUID();
+    const id = uuidv4();
     setInput("");
-    await addLog(id, input.trim(), userId);
+    const createdAt = date
+      ? new Date(date).toISOString()
+      : new Date().toISOString();
+    await addLog(id, input.trim(), userId, createdAt);
   };
 
   const handleDelete = (logId: string, close?: () => void) => {

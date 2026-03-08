@@ -6,7 +6,6 @@ import { ThemeProvider } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-
 import { ActivityIndicator, useColorScheme, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import "../../global.css";
@@ -14,7 +13,6 @@ import { AppServices } from "../components/AppServices";
 import { OfflineBanner } from "../components/OfflineBanner";
 import { authClient } from "../lib/auth-client";
 import { EvaDarkTheme, EvaLightTheme } from "../theme/navigationTheme";
-
 function RootNavigator() {
   const { data: session, isPending, refetch } = authClient.useSession();
   const isLoggedIn = !!session;
@@ -71,6 +69,12 @@ export default function RootLayout() {
 
   const scheme = useColorScheme();
   const isDark = scheme === "dark";
+
+  // useEffect(() => {
+  //   Purchases.setLogLevel(LOG_LEVEL.VERBOSE);
+  //   const iosApiKey = "test_oLkaMeOXtXJQriSWSuzDMMCwFSz";
+  //   Purchases.configure({ apiKey: iosApiKey });
+  // }, []);
 
   if (!fontsLoaded) return null;
 
