@@ -2,7 +2,6 @@ import Icon, { Phosphor } from "@/src/components/Icon";
 import { useNavigation, useRouter } from "expo-router";
 import { useLayoutEffect, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SearchScreen() {
   const [query, setQuery] = useState("");
@@ -38,15 +37,13 @@ export default function SearchScreen() {
   }, [navigation, router]);
 
   return (
-    <SafeAreaView className="flex-1">
-      <View className="flex-1 bg-screen-light dark:bg-screen-dark p-5">
-        <TextInput
-          value={query}
-          onChangeText={setQuery}
-          placeholder="Search logs..."
-          className="text-xl placeholder:text-text-secondary-light dark:placeholder:text-text-secondary-dark"
-        />
-      </View>
-    </SafeAreaView>
+    <View className="flex-1 bg-screen-light dark:bg-screen-dark p-5">
+      <TextInput
+        value={query}
+        onChangeText={setQuery}
+        placeholder="Search logs..."
+        className="text-xl placeholder:text-text-secondary-light dark:placeholder:text-text-secondary-dark"
+      />
+    </View>
   );
 }

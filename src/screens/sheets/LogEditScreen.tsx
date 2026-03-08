@@ -3,7 +3,6 @@ import { useLogStore } from "@/src/store/LogStore";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useCallback, useLayoutEffect, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function EditLogScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -92,21 +91,16 @@ export default function EditLogScreen() {
   if (!log) return null;
 
   return (
-    <SafeAreaView
-      style={{ flex: 1 }}
-      className="bg-screen-light dark:bg-screen-dark"
-    >
-      <View className="flex-1 p-5">
-        <TextInput
-          value={text}
-          onChangeText={setText}
-          placeholder="What did you eat?"
-          placeholderTextColor="#6B6B6B"
-          multiline
-          autoFocus
-          className="text-xl text-text-primary-light dark:text-text-primary-dark"
-        />
-      </View>
-    </SafeAreaView>
+    <View className="flex-1 bg-screen-light dark:bg-screen-dark p-5">
+      <TextInput
+        value={text}
+        onChangeText={setText}
+        placeholder="What did you eat?"
+        placeholderTextColor="#6B6B6B"
+        multiline
+        autoFocus
+        className="text-xl text-text-primary-light dark:text-text-primary-dark"
+      />
+    </View>
   );
 }

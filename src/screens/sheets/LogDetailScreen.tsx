@@ -4,7 +4,7 @@ import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import React, { useLayoutEffect } from "react";
 import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 
-export default function DetailedLogScreen() {
+export default function LogDetailScreen() {
   const router = useRouter();
   const navigation = useNavigation();
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -46,7 +46,7 @@ export default function DetailedLogScreen() {
                 return;
               }
               router.push({
-                pathname: "/(sheets)/edit-log",
+                pathname: "/(sheets)/log-edit",
                 params: { id: log?.id }, // ← only id, nothing else
               });
             }}

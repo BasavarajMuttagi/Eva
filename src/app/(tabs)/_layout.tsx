@@ -26,6 +26,21 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="history"
+        options={{
+          title: "History",
+          headerShown: false,
+          tabBarIcon: ({ color }) => (
+            <Icon
+              icon={Phosphor.ClockCounterClockwiseIcon}
+              size={24}
+              color={color}
+              weight="fill"
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="insights"
         options={{
           title: "Insights",

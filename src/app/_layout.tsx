@@ -70,12 +70,6 @@ export default function RootLayout() {
   const scheme = useColorScheme();
   const isDark = scheme === "dark";
 
-  // useEffect(() => {
-  //   Purchases.setLogLevel(LOG_LEVEL.VERBOSE);
-  //   const iosApiKey = "test_oLkaMeOXtXJQriSWSuzDMMCwFSz";
-  //   Purchases.configure({ apiKey: iosApiKey });
-  // }, []);
-
   if (!fontsLoaded) return null;
 
   return (

@@ -4,7 +4,7 @@ import { format, isToday, isYesterday } from "date-fns";
 import { useNavigation, useRouter } from "expo-router";
 import { useLayoutEffect, useMemo } from "react";
 import { FlatList, Pressable, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+
 type DayGroup = {
   date: string;
   title: string;
@@ -76,21 +76,7 @@ export default function HistoryScreen() {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerLeft: () => (
-        <Pressable
-          onPress={() => router.dismiss()}
-          className="bg-chip-light dark:bg-chip-dark p-2.5 rounded-full"
-        >
-          <View pointerEvents="none">
-            <Icon
-              icon={Phosphor.XIcon}
-              size={24}
-              weight="regular"
-              className="text-text-primary-light dark:text-text-primary-dark"
-            />
-          </View>
-        </Pressable>
-      ),
+      headerShadowVisible: false,
       headerTitle: () => (
         <Text
           style={{ fontFamily: "LibreBaskerville_700Bold", fontSize: 24 }}
@@ -101,7 +87,7 @@ export default function HistoryScreen() {
       ),
       headerRight: () => (
         <Pressable
-          onPress={() => router.push("/(sheets)/log-past-day")}
+          onPress={() => router.push("/history/log-missed-day")}
           className="bg-chip-light dark:bg-chip-dark p-2.5 rounded-full"
         >
           <View pointerEvents="none">
@@ -143,53 +129,51 @@ export default function HistoryScreen() {
   }, [logs]);
 
   return (
-    <SafeAreaView className="flex-1">
-      <View className="flex-1 bg-screen-light dark:bg-screen-dark px-5">
-        <FlatList
-          data={days}
-          keyExtractor={(item) => item.date}
-          renderItem={({ item }) => (
-            <DayItem
-              item={item}
-              onPress={() =>
-                router.push({
-                  pathname: "/(sheets)/day-logs",
-                  params: { date: item.date },
-                })
-              }
+    <View className="flex-1 bg-screen-light dark:bg-screen-dark">
+      <FlatList
+        data={days}
+        keyExtractor={(item) => item.date}
+        renderItem={({ item }) => (
+          <DayItem
+            item={item}
+            onPress={() =>
+              router.push({
+                pathname: "/history/selected-day",
+                params: { date: item.date },
+              })
+            }
+          />
+        )}
+        onEndReached={() => {
+          if (hasMore) loadOlder();
+        }}
+        onEndReachedThreshold={0.3}
+        ListFooterComponent={
+          days.length > 0 ? (
+            <Text className="text-center text-text-secondary-light dark:text-text-secondary-dark text-sm py-6">
+              {hasMore ? (syncing ? "Loading..." : "") : "No more history"}
+            </Text>
+          ) : null
+        }
+        ListEmptyComponent={
+          <View className="flex-1 items-center justify-center gap-3 pt-20">
+            <Icon
+              icon={Phosphor.ClockCounterClockwiseIcon}
+              size={32}
+              weight="duotone"
+              className="text-text-secondary-light dark:text-text-secondary-dark opacity-40"
             />
-          )}
-          onEndReached={() => {
-            if (hasMore) loadOlder();
-          }}
-          onEndReachedThreshold={0.3}
-          ListFooterComponent={
-            days.length > 0 ? (
-              <Text className="text-center text-text-secondary-light dark:text-text-secondary-dark text-sm py-6">
-                {hasMore ? (syncing ? "Loading..." : "") : "No more history"}
-              </Text>
-            ) : null
-          }
-          ListEmptyComponent={
-            <View className="flex-1 items-center justify-center gap-3 pt-20">
-              <Icon
-                icon={Phosphor.ClockCounterClockwiseIcon}
-                size={32}
-                weight="duotone"
-                className="text-text-secondary-light dark:text-text-secondary-dark opacity-40"
-              />
-              <Text className="text-text-primary-light dark:text-text-primary-dark text-base font-medium">
-                No history yet
-              </Text>
-              <Text className="text-text-secondary-light dark:text-text-secondary-dark text-sm text-center px-8">
-                Logs from previous days will appear here
-              </Text>
-            </View>
-          }
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 40, flexGrow: 1 }}
-        />
-      </View>
-    </SafeAreaView>
+            <Text className="text-text-primary-light dark:text-text-primary-dark text-base font-medium">
+              No history yet
+            </Text>
+            <Text className="text-text-secondary-light dark:text-text-secondary-dark text-sm text-center px-8">
+              Logs from previous days will appear here
+            </Text>
+          </View>
+        }
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 20 }}
+      />
+    </View>
   );
 }
