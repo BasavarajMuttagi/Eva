@@ -4,7 +4,7 @@ import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useCallback, useLayoutEffect, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 
-export default function EditLogScreen() {
+export default function LogEditScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
 
   const router = useRouter();

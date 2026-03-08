@@ -16,14 +16,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Swipeable, {
   SwipeableMethods,
 } from "react-native-gesture-handler/ReanimatedSwipeable";
 import "react-native-get-random-values";
 import { v4 as uuidv4 } from "uuid";
 
-// ─── RightActions ─────────────────────────────────────────────────────────────
 function RightActions({
   item,
   deletingId,
@@ -60,8 +58,6 @@ function RightActions({
   );
 }
 
-// ─── LogRowMeta ───────────────────────────────────────────────────────────────
-// shows processing / error / kcal on the right side of each row
 function LogRowMeta({ log }: { log: FoodLog }) {
   const { retryLog } = useLogStore();
 
@@ -124,6 +120,7 @@ function SwipeableRow({
 }) {
   const router = useRouter();
   const swipeableRef = useRef<SwipeableMethods>(null);
+  const isSwiping = useRef(false);
   const close = () => swipeableRef.current?.close();
 
   return (
@@ -131,6 +128,8 @@ function SwipeableRow({
       ref={swipeableRef}
       friction={2}
       rightThreshold={40}
+      onSwipeableWillOpen={() => (isSwiping.current = true)}
+      onSwipeableClose={() => (isSwiping.current = false)}
       renderRightActions={() => (
         <RightActions
           item={item}
@@ -140,12 +139,13 @@ function SwipeableRow({
       )}
     >
       <Pressable
-        onPress={() =>
+        onPress={() => {
+          if (isSwiping.current) return;
           router.push({
             pathname: "/(sheets)/log-detail",
             params: { id: item.id },
-          })
-        }
+          });
+        }}
         className="flex-row items-center justify-between py-3 bg-screen-light dark:bg-screen-dark"
       >
         <Text
@@ -160,9 +160,6 @@ function SwipeableRow({
   );
 }
 
-// ─── LogList ──────────────────────────────────────────────────────────────────
-// reusable list of logs for a given date
-// used by TodayScreen (date=today) and SelectedDayScreen (date=param)
 type Props = {
   date: Date;
   showRefresh?: boolean;
@@ -218,86 +215,84 @@ export function LogList({
   };
 
   return (
-    <GestureHandlerRootView className="flex-1">
-      <View className="flex-1 gap-y-5 bg-screen-light dark:bg-screen-dark p-5">
-        {/* Input */}
-        <View className="flex-row items-center justify-between">
-          <TextInput
-            value={input}
-            onChangeText={setInput}
-            placeholder="What did you eat?"
-            placeholderTextColor="#6B6B6B"
-            placeholderClassName="text-lg"
-            className="flex-1 text-lg text-text-primary-light dark:text-text-primary-dark"
-            style={{ lineHeight: undefined }}
-            onSubmitEditing={handleAdd}
-            returnKeyType="done"
-          />
-          <TouchableOpacity
-            onPress={handleAdd}
-            disabled={!input.trim()}
-            className={`px-4 py-2 rounded-full ${
-              input.trim()
-                ? "bg-accent-light dark:bg-accent-dark"
-                : "bg-accent-light/40 dark:bg-accent-dark/40"
-            }`}
-          >
-            <Text className="text-white text-sm">Add</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* List */}
-        <FlatList
-          data={dayLogs}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <SwipeableRow
-              item={item}
-              deletingId={deletingId}
-              onDelete={handleDelete}
-            />
-          )}
-          contentContainerStyle={{ paddingBottom: 40, flexGrow: 1 }}
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            showRefresh ? (
-              <RefreshControl refreshing={syncing} onRefresh={sync} />
-            ) : undefined
-          }
-          ListEmptyComponent={
-            <View className="flex-1 items-center justify-center gap-3">
-              {showRefresh && syncing ? (
-                <>
-                  <Icon
-                    icon={Phosphor.SparkleIcon}
-                    size={32}
-                    weight="fill"
-                    className="text-accent-light dark:text-accent-dark opacity-40"
-                  />
-                  <Text className="text-text-secondary-light dark:text-text-secondary-dark text-sm">
-                    Loading...
-                  </Text>
-                </>
-              ) : (
-                <>
-                  <Icon
-                    icon={Phosphor.ForkKnifeIcon}
-                    size={32}
-                    weight="duotone"
-                    className="text-text-secondary-light dark:text-text-secondary-dark opacity-40"
-                  />
-                  <Text className="text-text-primary-light dark:text-text-primary-dark text-base font-medium">
-                    {emptyTitle}
-                  </Text>
-                  <Text className="text-text-secondary-light dark:text-text-secondary-dark text-sm text-center px-8">
-                    {emptySubtitle}
-                  </Text>
-                </>
-              )}
-            </View>
-          }
+    <View className="flex-1 gap-y-5 bg-screen-light dark:bg-screen-dark p-5">
+      {/* Input */}
+      <View className="flex-row items-center justify-between">
+        <TextInput
+          value={input}
+          onChangeText={setInput}
+          placeholder="What did you eat?"
+          placeholderTextColor="#6B6B6B"
+          placeholderClassName="text-lg"
+          className="flex-1 text-lg text-text-primary-light dark:text-text-primary-dark"
+          style={{ lineHeight: undefined }}
+          onSubmitEditing={handleAdd}
+          returnKeyType="done"
         />
+        <TouchableOpacity
+          onPress={handleAdd}
+          disabled={!input.trim()}
+          className={`px-4 py-2 rounded-full ${
+            input.trim()
+              ? "bg-accent-light dark:bg-accent-dark"
+              : "bg-accent-light/40 dark:bg-accent-dark/40"
+          }`}
+        >
+          <Text className="text-white text-sm">Add</Text>
+        </TouchableOpacity>
       </View>
-    </GestureHandlerRootView>
+
+      {/* List */}
+      <FlatList
+        data={dayLogs}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <SwipeableRow
+            item={item}
+            deletingId={deletingId}
+            onDelete={handleDelete}
+          />
+        )}
+        contentContainerStyle={{ paddingBottom: 40, flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          showRefresh ? (
+            <RefreshControl refreshing={syncing} onRefresh={sync} />
+          ) : undefined
+        }
+        ListEmptyComponent={
+          <View className="flex-1 items-center justify-center gap-3">
+            {showRefresh && syncing ? (
+              <>
+                <Icon
+                  icon={Phosphor.SparkleIcon}
+                  size={32}
+                  weight="fill"
+                  className="text-accent-light dark:text-accent-dark opacity-40"
+                />
+                <Text className="text-text-secondary-light dark:text-text-secondary-dark text-sm">
+                  Loading...
+                </Text>
+              </>
+            ) : (
+              <>
+                <Icon
+                  icon={Phosphor.ForkKnifeIcon}
+                  size={32}
+                  weight="duotone"
+                  className="text-text-secondary-light dark:text-text-secondary-dark opacity-40"
+                />
+                <Text className="text-text-primary-light dark:text-text-primary-dark text-base font-medium">
+                  {emptyTitle}
+                </Text>
+                <Text className="text-text-secondary-light dark:text-text-secondary-dark text-sm text-center px-8">
+                  {emptySubtitle}
+                </Text>
+              </>
+            )}
+          </View>
+        }
+      />
+    </View>
   );
 }

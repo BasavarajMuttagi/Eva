@@ -1,3 +1,4 @@
+import "@/global.css";
 import {
   LibreBaskerville_400Regular,
   LibreBaskerville_700Bold,
@@ -6,15 +7,16 @@ import { ThemeProvider } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import React from "react";
 import { ActivityIndicator, useColorScheme, View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import "../../global.css";
 import { AppServices } from "../components/AppServices";
 import { OfflineBanner } from "../components/OfflineBanner";
 import { authClient } from "../lib/auth-client";
 import { EvaDarkTheme, EvaLightTheme } from "../theme/navigationTheme";
 function RootNavigator() {
-  const { data: session, isPending, refetch } = authClient.useSession();
+  const { data: session, isPending } = authClient.useSession();
   const isLoggedIn = !!session;
   const isOnboarded = (session?.user as any)?.isOnboarded ?? false;
 
@@ -74,11 +76,13 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={isDark ? EvaDarkTheme : EvaLightTheme}>
-      <OfflineBanner />
-      <SafeAreaProvider>
-        <StatusBar style={isDark ? "light" : "dark"} />
-        <RootNavigator />
-      </SafeAreaProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <OfflineBanner />
+        <SafeAreaProvider>
+          <StatusBar style={isDark ? "light" : "dark"} />
+          <RootNavigator />
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
     </ThemeProvider>
   );
 }

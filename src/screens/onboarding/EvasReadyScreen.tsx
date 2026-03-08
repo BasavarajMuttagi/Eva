@@ -24,11 +24,9 @@ export default function EvasReadyScreen() {
         age,
         gender,
         activityLevel,
-        waterTrackingEnabled: false,
-        sleepTrackingEnabled: false,
       });
       reset();
-      await refetch(); // ← this is what you need
+      await refetch();
       router.replace("/(tabs)/today");
     } catch (err) {
       console.warn("[EvasReady] failed to save preferences", err);

@@ -1,4 +1,6 @@
 import Icon, { Phosphor } from "@/src/components/Icon";
+import { SignOutButton } from "@/src/components/SignOutButton";
+import { apiClient } from "@/src/lib/apiClient";
 import { authClient } from "@/src/lib/auth-client";
 import { useLogStore } from "@/src/store/LogStore";
 import { useRouter } from "expo-router";
@@ -11,8 +13,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SignOutButton } from "../components/SignOutButton";
-import { apiClient } from "../lib/apiClient";
 
 export default function SettingsScreen() {
   const router = useRouter();

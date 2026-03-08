@@ -57,8 +57,6 @@ type Prefs = {
   age: number;
   gender: (typeof GENDER_VALUES)[number];
   activityLevel: (typeof ACTIVITY_VALUES)[number];
-  waterTrackingEnabled: boolean;
-  sleepTrackingEnabled: boolean;
 };
 
 export default function ProfileScreen() {
@@ -98,8 +96,6 @@ export default function ProfileScreen() {
         age: Number(data.age),
         gender: data.gender,
         activityLevel: data.activityLevel,
-        waterTrackingEnabled: prefs?.waterTrackingEnabled ?? false,
-        sleepTrackingEnabled: prefs?.sleepTrackingEnabled ?? false,
       });
       router.dismiss();
     } catch {
