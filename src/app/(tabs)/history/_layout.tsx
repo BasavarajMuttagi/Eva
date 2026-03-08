@@ -8,8 +8,9 @@ export default function HistoryLayout() {
       <Stack.Screen
         name="log-missed-day"
         options={{
-          presentation: "modal",
+          presentation: "formSheet",
           animation: "slide_from_bottom",
+          sheetCornerRadius: 30,
         }}
       />
     </Stack>

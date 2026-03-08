@@ -8,7 +8,6 @@ import { Pressable, Text, View } from "react-native";
 export default function LogMissedDayScreen() {
   const router = useRouter();
   const navigation = useNavigation();
-
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
   yesterday.setHours(0, 0, 0, 0);
@@ -76,19 +75,21 @@ export default function LogMissedDayScreen() {
       </View>
 
       {/* Date picker */}
-      <DateTimePicker
-        value={selectedDate}
-        mode="date"
-        display="inline"
-        maximumDate={today}
-        onChange={(_, date) => {
-          if (date) {
-            date.setHours(0, 0, 0, 0);
-            setSelectedDate(date);
-          }
-        }}
-        accentColor="#C87BA0"
-      />
+      <View className="items-center">
+        <DateTimePicker
+          value={selectedDate}
+          mode="date"
+          display="inline"
+          maximumDate={today}
+          onChange={(_, date) => {
+            if (date) {
+              date.setHours(0, 0, 0, 0);
+              setSelectedDate(date);
+            }
+          }}
+          accentColor="#C87BA0"
+        />
+      </View>
 
       {/* Continue button */}
       <Pressable
