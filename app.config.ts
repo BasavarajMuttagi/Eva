@@ -1,8 +1,13 @@
 import { ConfigContext, ExpoConfig } from "expo/config";
 
+const appVariant = process.env.APP_VARIANT;
+const bundleId = process.env.EXPO_PUBLIC_BUNDLE_IDENTIFIER;
+const appName = process.env.EXPO_PUBLIC_APP_NAME as string;
+const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL;
+
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: "Eva",
+  name: appName,
   slug: "Eva",
   version: "1.0.0",
   orientation: "portrait",
@@ -10,17 +15,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   scheme: "eva",
   userInterfaceStyle: "automatic",
   newArchEnabled: true,
+  platforms: ["ios"],
   ios: {
     supportsTablet: true,
-    bundleIdentifier: "in.polyfills.eva",
+    bundleIdentifier: bundleId,
     infoPlist: {
       UIDesignRequiresCompatibility: true,
     },
-  },
-  web: {
-    bundler: "metro",
-    output: "static",
-    favicon: "./assets/images/favicon.png",
   },
   plugins: [
     "expo-router",
@@ -44,10 +45,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     typedRoutes: true,
     reactCompiler: true,
   },
-  android: {
-    package: "in.polyfills.eva",
-  },
   extra: {
-    apiUrl: process.env.EXPO_PUBLIC_API_BASE_URL,
+    appVariant,
+    apiBaseUrl,
   },
 });
