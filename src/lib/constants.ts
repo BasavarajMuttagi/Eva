@@ -1,2 +1,8 @@
 import Constants from "expo-constants";
-export const API_BASE_URL = Constants.expoConfig?.extra?.apiBaseUrl as string;
+const extra = Constants.expoConfig?.extra;
+
+export const APP_VARIANT = extra?.appVariant;
+export const APP_SCHEME = extra?.appScheme;
+export const BUNDLE_ID = extra?.bundleId;
+export const APP_NAME = extra?.appName;
+export const API_BASE_URL = extra?.apiBaseUrl;

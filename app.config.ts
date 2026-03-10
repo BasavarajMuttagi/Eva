@@ -1,10 +1,10 @@
 import "dotenv/config";
 import { ConfigContext, ExpoConfig } from "expo/config";
-const appVariant = process.env.APP_VARIANT;
-const appScheme = process.env.APP_SCHEME;
-const bundleId = process.env.BUNDLE_IDENTIFIER as string;
-const appName = process.env.APP_NAME as string;
-const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL;
+const appVariant = process.env.EXPO_PUBLIC_APP_VARIANT!;
+const appScheme = process.env.EXPO_PUBLIC_APP_SCHEME!;
+const bundleId = process.env.EXPO_PUBLIC_BUNDLE_IDENTIFIER as string;
+const appName = process.env.EXPO_PUBLIC_APP_NAME as string;
+const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL!;
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
@@ -51,6 +51,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   extra: {
     appVariant,
+    appScheme,
+    bundleId,
+    appName,
     apiBaseUrl,
   },
 });

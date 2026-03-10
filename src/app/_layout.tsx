@@ -10,7 +10,7 @@ import { StatusBar } from "expo-status-bar";
 import React, { useEffect } from "react";
 import { ActivityIndicator, useColorScheme, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import Purchases, { LOG_LEVEL } from "react-native-purchases";
+import Purchases from "react-native-purchases";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AppServices } from "../components/AppServices";
 import { OfflineBanner } from "../components/OfflineBanner";
@@ -73,8 +73,8 @@ export default function RootLayout() {
   const scheme = useColorScheme();
   const isDark = scheme === "dark";
   useEffect(() => {
-    Purchases.setLogLevel(LOG_LEVEL.VERBOSE);
-    Purchases.configure({ apiKey: "" });
+    // Purchases.setLogLevel(LOG_LEVEL.VERBOSE);
+    Purchases.configure({ apiKey: process.env.EXPO_PUBLIC_RC_IOS_API_KEY! });
   }, []);
 
   if (!fontsLoaded) return null;
