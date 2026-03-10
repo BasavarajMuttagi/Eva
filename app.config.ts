@@ -1,5 +1,5 @@
+import "dotenv/config";
 import { ConfigContext, ExpoConfig } from "expo/config";
-
 const appVariant = process.env.APP_VARIANT;
 const bundleId = process.env.EXPO_PUBLIC_BUNDLE_IDENTIFIER;
 const appName = process.env.EXPO_PUBLIC_APP_NAME as string;
