@@ -4,10 +4,10 @@
   "version": "1.0.0",
   "scripts": {
     "start": "expo start",
-    "android": "expo run:android",
-    "ios": "expo run:ios",
-    "web": "expo start --web",
-    "ios:production": "expo run:ios --configuration Release",
+    "dev:debug": "NODE_ENV=development expo run:ios --configuration Debug",
+    "dev:release": "NODE_ENV=development expo run:ios --configuration Release",
+    "staging:release": "NODE_ENV=preview expo run:ios --configuration Release",
+    "prod:release": "NODE_ENV=production expo run:ios --configuration Release",
     "lint": "expo lint"
   },
   "dependencies": {
