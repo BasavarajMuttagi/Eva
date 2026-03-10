@@ -1,8 +1,9 @@
 import "dotenv/config";
 import { ConfigContext, ExpoConfig } from "expo/config";
 const appVariant = process.env.APP_VARIANT;
-const bundleId = process.env.EXPO_PUBLIC_BUNDLE_IDENTIFIER;
-const appName = process.env.EXPO_PUBLIC_APP_NAME as string;
+const appScheme = process.env.APP_SCHEME;
+const bundleId = process.env.BUNDLE_IDENTIFIER as string;
+const appName = process.env.APP_NAME as string;
 const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL;
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
@@ -12,15 +13,17 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   version: "1.0.0",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
-  scheme: "eva",
+  scheme: appScheme,
   userInterfaceStyle: "automatic",
   newArchEnabled: true,
   platforms: ["ios"],
+
   ios: {
     supportsTablet: true,
     bundleIdentifier: bundleId,
     infoPlist: {
       UIDesignRequiresCompatibility: true,
+      CFBundleDisplayName: appName,
     },
   },
   plugins: [
@@ -40,6 +43,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     "expo-font",
     "expo-secure-store",
     "@react-native-community/datetimepicker",
+    ["expo-build-properties", { ios: { deploymentTarget: "18.6" } }],
   ],
   experiments: {
     typedRoutes: true,

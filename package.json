@@ -8,7 +8,9 @@
     "dev:release": "NODE_ENV=development expo run:ios --configuration Release",
     "staging:release": "NODE_ENV=preview expo run:ios --configuration Release",
     "prod:release": "NODE_ENV=production expo run:ios --configuration Release",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   },
   "dependencies": {
     "@better-auth/expo": "^1.4.19",
@@ -25,6 +27,7 @@
     "date-fns": "^4.1.0",
     "dotenv": "^17.3.1",
     "expo": "~54.0.33",
+    "expo-build-properties": "~1.0.10",
     "expo-constants": "~18.0.13",
     "expo-font": "~14.0.11",
     "expo-haptics": "~15.0.8",

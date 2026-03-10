@@ -7,9 +7,10 @@ import { ThemeProvider } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React from "react";
+import React, { useEffect } from "react";
 import { ActivityIndicator, useColorScheme, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import Purchases, { LOG_LEVEL } from "react-native-purchases";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AppServices } from "../components/AppServices";
 import { OfflineBanner } from "../components/OfflineBanner";
@@ -71,6 +72,10 @@ export default function RootLayout() {
 
   const scheme = useColorScheme();
   const isDark = scheme === "dark";
+  useEffect(() => {
+    Purchases.setLogLevel(LOG_LEVEL.VERBOSE);
+    Purchases.configure({ apiKey: "" });
+  }, []);
 
   if (!fontsLoaded) return null;
 
