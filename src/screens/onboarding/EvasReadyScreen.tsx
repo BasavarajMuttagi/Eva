@@ -2,9 +2,17 @@ import Icon, { Phosphor } from "@/src/components/Icon";
 import { apiClient } from "@/src/lib/apiClient";
 import { authClient } from "@/src/lib/auth-client";
 import { useOnboardingData } from "@/src/store/OnboardingData";
+import { Image } from "expo-image";
 import { useRouter } from "expo-router";
+import { cssInterop } from "nativewind";
 import React, { useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
+
+cssInterop(Image, {
+  className: {
+    target: "style",
+  },
+});
 
 export default function EvasReadyScreen() {
   const router = useRouter();
@@ -37,32 +45,31 @@ export default function EvasReadyScreen() {
   };
 
   return (
-    <View className="flex-1 bg-screen-light dark:bg-screen-dark px-6 pt-16 pb-8">
+    <View className="flex-1 bg-screen-light dark:bg-screen-dark px-8 pt-16 pb-10">
       {/* Main content fully centered */}
-      <View className="flex-1 items-center justify-center">
-        {/* Illustration */}
-        <View className="w-72 h-72 rounded-full bg-card-light dark:bg-card-dark items-center justify-center mb-10">
-          <Icon
-            icon={Phosphor.LeafIcon}
-            size={64}
-            weight="fill"
-            className="text-accent-light dark:text-accent-dark"
-          />
-        </View>
+      <View className="flex-1 items-center justify-center gap-6">
+        <Image
+          source={require("@/assets/images/icon.png")}
+          className="w-28 h-28"
+        />
 
         {/* Text block */}
-        <View className="px-4 items-center">
-          <Text className="text-3xl font-extrabold text-text-primary-light dark:text-text-primary-dark text-center">
+        <View className="items-center gap-3">
+          <Text
+            style={{
+              fontFamily: "LibreBaskerville_700Bold",
+              letterSpacing: -1,
+            }}
+            className="text-4xl text-text-primary-light dark:text-text-primary-dark text-center"
+          >
             Eva's ready.
           </Text>
-          <Text className="mt-5 text-base leading-6 text-text-secondary-light dark:text-text-secondary-dark text-center">
+          <Text className="text-base leading-6 text-text-secondary-light dark:text-text-secondary-dark text-center">
             Now just tell Eva what you ate today.{"\n"}
             She'll take care of the rest.
           </Text>
           {error && (
-            <Text className="mt-4 text-sm text-red-500 text-center">
-              {error}
-            </Text>
+            <Text className="text-sm text-red-500 text-center">{error}</Text>
           )}
         </View>
       </View>
@@ -71,26 +78,23 @@ export default function EvasReadyScreen() {
       <Pressable
         onPress={handleStart}
         disabled={loading}
-        className={`self-stretch rounded-full py-4 px-6 items-center justify-center ${
-          loading
-            ? "bg-border-light dark:bg-border-dark"
-            : "bg-text-primary-light dark:bg-text-primary-dark"
-        }`}
+        style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+        className="flex-row items-center bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark rounded-2xl py-4 px-5"
       >
         {loading ? (
-          <ActivityIndicator />
+          <ActivityIndicator className="flex-1" />
         ) : (
-          <View className="flex-row items-center gap-2">
-            <Text className="text-base font-semibold text-screen-light dark:text-screen-dark">
+          <>
+            <Text className="text-[15px] font-semibold text-text-primary-light dark:text-text-primary-dark flex-1 text-center">
               Start journaling
             </Text>
             <Icon
               icon={Phosphor.ArrowRightIcon}
-              size={16}
-              weight="bold"
-              className="text-screen-light dark:text-screen-dark"
+              size={18}
+              weight="regular"
+              className="text-text-secondary-light dark:text-text-secondary-dark"
             />
-          </View>
+          </>
         )}
       </Pressable>
     </View>

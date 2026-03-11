@@ -238,7 +238,7 @@ export function LogList({
               : "bg-accent-light/40 dark:bg-accent-dark/40"
           }`}
         >
-          <Text className="text-white text-sm">Add</Text>
+          <Text className="text-white text-sm font-semibold">Add</Text>
         </TouchableOpacity>
       </View>
 

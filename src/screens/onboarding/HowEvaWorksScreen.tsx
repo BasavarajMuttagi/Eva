@@ -15,7 +15,7 @@ export default function HowEvaWorksScreen() {
   };
 
   return (
-    <View className="flex-1 bg-screen-light dark:bg-screen-dark px-6 pt-16 pb-8">
+    <View className="flex-1 bg-screen-light dark:bg-screen-dark px-6 pt-16 pb-10">
       {/* Top bar: chip back button */}
       <View className="flex-row items-center justify-between mb-8">
         <Pressable
@@ -36,14 +36,19 @@ export default function HowEvaWorksScreen() {
       <View className="flex-1 justify-center">
         {/* Title */}
         <View className="pr-6 mb-10">
-          <Text className="text-4xl font-extrabold text-text-primary-light dark:text-text-primary-dark leading-tight">
+          <Text
+            style={{
+              fontFamily: "LibreBaskerville_700Bold",
+              letterSpacing: -1,
+            }}
+            className="text-4xl text-text-primary-light dark:text-text-primary-dark leading-tight"
+          >
             How Eva works
           </Text>
         </View>
 
         {/* Bullets */}
         <View className="gap-6">
-          {/* Bullet 1 */}
           <View className="flex-row items-start gap-3 pr-6">
             <View className="mt-1 bg-chip-light dark:bg-chip-dark rounded-full p-2">
               <Icon
@@ -63,7 +68,6 @@ export default function HowEvaWorksScreen() {
             </View>
           </View>
 
-          {/* Bullet 2 */}
           <View className="flex-row items-start gap-3 pr-6">
             <View className="mt-1 bg-chip-light dark:bg-chip-dark rounded-full p-2">
               <Icon
@@ -83,7 +87,6 @@ export default function HowEvaWorksScreen() {
             </View>
           </View>
 
-          {/* Bullet 3 */}
           <View className="flex-row items-start gap-3 pr-6">
             <View className="mt-1 bg-chip-light dark:bg-chip-dark rounded-full p-2">
               <Icon
@@ -108,19 +111,18 @@ export default function HowEvaWorksScreen() {
       {/* Bottom CTA */}
       <Pressable
         onPress={handleContinue}
-        className="self-stretch rounded-full bg-text-primary-light dark:bg-text-primary-dark py-4 px-6 items-center justify-center"
+        style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+        className="flex-row items-center bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark rounded-2xl py-4 px-5"
       >
-        <View className="flex-row items-center gap-2">
-          <Text className="text-base font-semibold text-screen-light dark:text-screen-dark">
-            Sounds good
-          </Text>
-          <Icon
-            icon={Phosphor.ArrowRightIcon}
-            size={16}
-            weight="bold"
-            className="text-screen-light dark:text-screen-dark"
-          />
-        </View>
+        <Text className="text-[15px] font-semibold text-text-primary-light dark:text-text-primary-dark flex-1 text-center">
+          Sounds good
+        </Text>
+        <Icon
+          icon={Phosphor.ArrowRightIcon}
+          size={18}
+          weight="regular"
+          className="text-text-secondary-light dark:text-text-secondary-dark"
+        />
       </Pressable>
     </View>
   );

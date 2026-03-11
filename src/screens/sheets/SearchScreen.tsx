@@ -38,12 +38,33 @@ export default function SearchScreen() {
 
   return (
     <View className="flex-1 bg-screen-light dark:bg-screen-dark p-5">
-      <TextInput
-        value={query}
-        onChangeText={setQuery}
-        placeholder="Search logs..."
-        className="text-xl placeholder:text-text-secondary-light dark:placeholder:text-text-secondary-dark"
-      />
+      <View className="flex-row items-center gap-3 bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark rounded-2xl px-4 py-3">
+        <Icon
+          icon={Phosphor.MagnifyingGlassIcon}
+          size={18}
+          weight="regular"
+          className="text-text-secondary-light dark:text-text-secondary-dark"
+        />
+        <TextInput
+          value={query}
+          onChangeText={setQuery}
+          placeholder="Search logs..."
+          placeholderTextColor="#6B6B6B"
+          autoFocus
+          className="flex-1 text-base text-text-primary-light dark:text-text-primary-dark"
+          style={{ lineHeight: undefined }}
+        />
+        {query.length > 0 && (
+          <Pressable onPress={() => setQuery("")}>
+            <Icon
+              icon={Phosphor.XCircleIcon}
+              size={18}
+              weight="fill"
+              className="text-text-secondary-light dark:text-text-secondary-dark"
+            />
+          </Pressable>
+        )}
+      </View>
     </View>
   );
 }

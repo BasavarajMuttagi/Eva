@@ -33,7 +33,7 @@ export default function ActivityLevelScreen() {
   };
 
   return (
-    <View className="flex-1 bg-screen-light dark:bg-screen-dark px-6 pt-16 pb-8">
+    <View className="flex-1 bg-screen-light dark:bg-screen-dark px-6 pt-16 pb-10">
       {/* Top bar: chip back */}
       <View className="flex-row items-center justify-between mb-8">
         <Pressable
@@ -52,7 +52,10 @@ export default function ActivityLevelScreen() {
 
       {/* Title + subtitle */}
       <View className="pr-6 mb-8">
-        <Text className="text-4xl font-extrabold text-text-primary-light dark:text-text-primary-dark leading-tight">
+        <Text
+          style={{ fontFamily: "LibreBaskerville_700Bold", letterSpacing: -1 }}
+          className="text-4xl text-text-primary-light dark:text-text-primary-dark leading-tight"
+        >
           How active are{"\n"}you?
         </Text>
         <Text className="mt-4 text-base leading-6 text-text-secondary-light dark:text-text-secondary-dark">
@@ -71,8 +74,10 @@ export default function ActivityLevelScreen() {
           return (
             <Pressable
               onPress={() => setActivityLevel(item.key)}
-              className={`flex-row items-center justify-between rounded-xl p-4 ${
-                isSelected ? "bg-accent-light/10 dark:bg-accent-dark/10" : ""
+              className={`flex-row items-center justify-between rounded-2xl p-4 mb-2 border ${
+                isSelected
+                  ? "bg-card-light dark:bg-card-dark border-border-light dark:border-border-dark"
+                  : "border-transparent"
               }`}
             >
               <View className="flex-1">
@@ -83,6 +88,14 @@ export default function ActivityLevelScreen() {
                   {item.subtitle}
                 </Text>
               </View>
+              {isSelected && (
+                <Icon
+                  icon={Phosphor.CheckIcon}
+                  size={18}
+                  weight="bold"
+                  className="text-accent-light dark:text-accent-dark"
+                />
+              )}
             </Pressable>
           );
         }}
@@ -91,19 +104,18 @@ export default function ActivityLevelScreen() {
       {/* Bottom CTA */}
       <Pressable
         onPress={handleContinue}
-        className="self-stretch rounded-full bg-text-primary-light dark:bg-text-primary-dark py-4 px-6 items-center justify-center"
+        style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+        className="flex-row items-center bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark rounded-2xl py-4 px-5"
       >
-        <View className="flex-row items-center gap-2">
-          <Text className="text-base font-semibold text-screen-light dark:text-screen-dark">
-            Continue
-          </Text>
-          <Icon
-            icon={Phosphor.ArrowRightIcon}
-            size={16}
-            weight="bold"
-            className="text-screen-light dark:text-screen-dark"
-          />
-        </View>
+        <Text className="text-[15px] font-semibold text-text-primary-light dark:text-text-primary-dark flex-1 text-center">
+          Continue
+        </Text>
+        <Icon
+          icon={Phosphor.ArrowRightIcon}
+          size={18}
+          weight="regular"
+          className="text-text-secondary-light dark:text-text-secondary-dark"
+        />
       </Pressable>
     </View>
   );

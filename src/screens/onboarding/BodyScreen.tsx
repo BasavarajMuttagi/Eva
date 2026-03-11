@@ -80,7 +80,13 @@ export default function BodyScreen() {
 
         {/* Title + subtitle */}
         <View className="pr-6 mb-10">
-          <Text className="text-4xl font-extrabold text-text-primary-light dark:text-text-primary-dark leading-tight">
+          <Text
+            style={{
+              fontFamily: "LibreBaskerville_700Bold",
+              letterSpacing: -1,
+            }}
+            className="text-4xl text-text-primary-light dark:text-text-primary-dark leading-tight"
+          >
             Tell me a little{"\n"}about you.
           </Text>
           <Text className="mt-4 text-base leading-6 text-text-secondary-light dark:text-text-secondary-dark">
@@ -189,35 +195,36 @@ export default function BodyScreen() {
       </ScrollView>
 
       {/* Bottom CTA */}
-      <View className="px-6 pb-8">
+      <View className="px-6 pb-10">
         <Pressable
           onPress={handleContinue}
           disabled={isDisabled}
-          className={`self-stretch rounded-full py-4 px-6 items-center justify-center ${
+          style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+          className={`flex-row items-center rounded-2xl py-4 px-5 ${
             isDisabled
-              ? "bg-border-light dark:bg-border-dark"
-              : "bg-text-primary-light dark:bg-text-primary-dark"
+              ? "bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark"
+              : "bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark"
           }`}
         >
-          <View className="flex-row items-center gap-2">
-            <Text
-              className={`text-base font-semibold ${
-                isDisabled
-                  ? "text-text-secondary-light dark:text-text-secondary-dark"
-                  : "text-screen-light dark:text-screen-dark"
-              }`}
-            >
-              Continue
-            </Text>
-            {!isDisabled && (
-              <Icon
-                icon={Phosphor.ArrowRightIcon}
-                size={16}
-                weight="bold"
-                className="text-screen-light dark:text-screen-dark"
-              />
-            )}
-          </View>
+          <Text
+            className={`text-[15px] font-semibold flex-1 text-center ${
+              isDisabled
+                ? "text-text-secondary-light dark:text-text-secondary-dark"
+                : "text-text-primary-light dark:text-text-primary-dark"
+            }`}
+          >
+            Continue
+          </Text>
+          <Icon
+            icon={Phosphor.ArrowRightIcon}
+            size={18}
+            weight="regular"
+            className={
+              isDisabled
+                ? "text-text-secondary-light dark:text-text-secondary-dark"
+                : "text-text-secondary-light dark:text-text-secondary-dark"
+            }
+          />
         </Pressable>
       </View>
     </KeyboardAvoidingView>

@@ -1,7 +1,7 @@
 import Icon, { Phosphor } from "@/src/components/Icon";
 import { useLogStore } from "@/src/store/LogStore";
 import React from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, Text } from "react-native";
 import { authClient } from "../lib/auth-client";
 
 export function SignOutButton() {
@@ -15,19 +15,18 @@ export function SignOutButton() {
   return (
     <Pressable
       onPress={handleSignOut}
-      className="mt-2 self-stretch items-center justify-center rounded-full bg-chip-light dark:bg-chip-dark p-4"
+      style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+      className="mt-2 flex-row items-center bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark rounded-2xl py-4 px-5"
     >
-      <View className="flex-row items-center gap-2">
-        <Icon
-          icon={Phosphor.SignOutIcon}
-          size={16}
-          weight="bold"
-          className="text-text-primary-light dark:text-text-primary-dark"
-        />
-        <Text className="text-text-primary-light dark:text-text-primary-dark font-semibold text-md">
-          Sign out
-        </Text>
-      </View>
+      <Text className="text-[15px] font-semibold text-text-primary-light dark:text-text-primary-dark flex-1 text-center">
+        Sign out
+      </Text>
+      <Icon
+        icon={Phosphor.SignOutIcon}
+        size={18}
+        weight="regular"
+        className="text-text-secondary-light dark:text-text-secondary-dark"
+      />
     </Pressable>
   );
 }

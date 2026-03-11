@@ -1,6 +1,15 @@
+import Icon, { Phosphor } from "@/src/components/Icon";
+import { Image } from "expo-image";
 import { useRouter } from "expo-router";
+import { cssInterop } from "nativewind";
 import React from "react";
 import { Pressable, Text, View } from "react-native";
+
+cssInterop(Image, {
+  className: {
+    target: "style",
+  },
+});
 
 export default function WelcomeScreen() {
   const router = useRouter();
@@ -10,48 +19,50 @@ export default function WelcomeScreen() {
   };
 
   return (
-    <View className="flex-1 bg-screen-light dark:bg-screen-dark px-6 pt-16 pb-8">
-      {/* Main content vertically centered */}
-      <View className="flex-1 items-center justify-center">
-        {/* Logo mark */}
-        <View className="items-center mb-8">
-          <View className="w-12 h-12 rounded-full bg-card-light dark:bg-card-dark items-center justify-center">
-            <Text className="text-text-primary-light dark:text-text-primary-dark text-xl">
-              🌱
-            </Text>
-          </View>
-        </View>
+    <View className="flex-1 bg-screen-light dark:bg-screen-dark px-8 pt-16 pb-10">
+      {/* Center content */}
+      <View className="flex-1 items-center justify-center gap-6">
+        <Image
+          source={require("@/assets/images/icon.png")}
+          className="w-28 h-28"
+        />
 
-        {/* Text block */}
-        <View className="items-center">
-          <Text className="tracking-[0.22em] text-xs font-semibold text-text-secondary-light dark:text-text-secondary-dark">
-            WELCOME TO
-          </Text>
-
-          <Text className="mt-3 text-5xl font-extrabold text-text-primary-light dark:text-text-primary-dark">
+        <View className="items-center gap-3">
+          <Text
+            style={{
+              fontFamily: "LibreBaskerville_700Bold",
+              letterSpacing: -1,
+            }}
+            className="text-5xl text-text-primary-light dark:text-text-primary-dark"
+          >
             Eva
           </Text>
-
-          <Text className="mt-8 text-2xl font-semibold text-text-primary-light dark:text-text-primary-dark text-center">
+          <Text className="text-lg font-semibold text-text-primary-light dark:text-text-primary-dark text-center">
             Just you, remembered.
           </Text>
-
-          <Text className="mt-5 text-base leading-6 text-text-secondary-light dark:text-text-secondary-dark text-center">
+          <Text className="text-base leading-6 text-text-secondary-light dark:text-text-secondary-dark text-center mt-1">
             Eva is a food journal. Not a tracker. Not a coach. Just a quiet
             companion that notices what you eat and reflects it back, warmly.
           </Text>
         </View>
       </View>
 
-      {/* CTA pinned to bottom */}
-      <View className="mt-auto">
+      {/* Bottom CTA */}
+      <View className="gap-3">
         <Pressable
           onPress={handleMeetEva}
-          className="self-stretch rounded-full bg-text-primary-light dark:bg-text-primary-dark py-4 px-6 items-center justify-center"
+          style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+          className="flex-row items-center bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark rounded-2xl py-4 px-5"
         >
-          <Text className="text-base font-semibold text-screen-light dark:text-screen-dark">
+          <Text className="text-[15px] font-semibold text-text-primary-light dark:text-text-primary-dark flex-1 text-center">
             Meet Eva
           </Text>
+          <Icon
+            icon={Phosphor.ArrowRightIcon}
+            size={18}
+            weight="regular"
+            className="text-text-secondary-light dark:text-text-secondary-dark"
+          />
         </Pressable>
       </View>
     </View>

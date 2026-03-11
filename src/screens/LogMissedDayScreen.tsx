@@ -54,7 +54,7 @@ export default function LogMissedDayScreen() {
   }
 
   return (
-    <View className="flex-1 bg-screen-light dark:bg-screen-dark px-5 pt-4">
+    <View className="flex-1 bg-screen-light dark:bg-screen-dark px-5 pt-4 pb-10">
       {/* Info card */}
       <View className="bg-card-light dark:bg-card-dark rounded-2xl p-4 mb-6 flex-row gap-3">
         <Icon
@@ -94,11 +94,18 @@ export default function LogMissedDayScreen() {
       {/* Continue button */}
       <Pressable
         onPress={handleContinue}
-        className="bg-accent-light dark:bg-accent-dark rounded-2xl p-4 mt-6 items-center"
+        style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+        className="flex-row items-center bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark rounded-2xl py-4 px-5 mt-6"
       >
-        <Text className="text-white font-semibold text-base">
+        <Text className="text-[15px] font-semibold text-text-primary-light dark:text-text-primary-dark flex-1 text-center">
           Go to {format(selectedDate, "EEE, MMM d")}
         </Text>
+        <Icon
+          icon={Phosphor.ArrowRightIcon}
+          size={18}
+          weight="regular"
+          className="text-text-secondary-light dark:text-text-secondary-dark"
+        />
       </Pressable>
     </View>
   );
