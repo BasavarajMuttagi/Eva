@@ -57,7 +57,7 @@ export default function BodyScreen() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView
-        className="flex-1 px-6 pt-16"
+        className="flex-1 px-8 pt-16"
         contentContainerStyle={{ paddingBottom: 24 }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -66,14 +66,14 @@ export default function BodyScreen() {
         <View className="flex-row items-center justify-between mb-8">
           <Pressable
             onPress={handleBack}
-            className="bg-chip-light dark:bg-chip-dark p-2 rounded-full -ml-2"
+            className="bg-accent-light dark:bg-accent-dark p-2 rounded-full -ml-2"
             hitSlop={8}
           >
             <Icon
               icon={Phosphor.ArrowLeftIcon}
               size={24}
               weight="regular"
-              className="text-text-primary-light dark:text-text-primary-dark"
+              className="text-screen-light"
             />
           </Pressable>
         </View>
@@ -203,14 +203,14 @@ export default function BodyScreen() {
           className={`flex-row items-center rounded-2xl py-4 px-5 ${
             isDisabled
               ? "bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark"
-              : "bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark"
+              : "bg-accent-light dark:bg-accent-dark"
           }`}
         >
           <Text
             className={`text-[15px] font-semibold flex-1 text-center ${
               isDisabled
                 ? "text-text-secondary-light dark:text-text-secondary-dark"
-                : "text-text-primary-light dark:text-text-primary-dark"
+                : "text-screen-light"
             }`}
           >
             Continue
@@ -222,7 +222,7 @@ export default function BodyScreen() {
             className={
               isDisabled
                 ? "text-text-secondary-light dark:text-text-secondary-dark"
-                : "text-text-secondary-light dark:text-text-secondary-dark"
+                : "text-screen-light"
             }
           />
         </Pressable>

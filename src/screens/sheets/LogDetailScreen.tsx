@@ -17,14 +17,14 @@ export default function LogDetailScreen() {
       headerLeft: () => (
         <Pressable
           onPress={() => router.dismiss()}
-          className="bg-chip-light dark:bg-chip-dark p-2.5 rounded-full"
+          className="bg-accent-light dark:bg-accent-dark p-2.5 rounded-full"
         >
           <View pointerEvents="none">
             <Icon
               icon={Phosphor.XIcon}
               size={24}
               weight="regular"
-              className="text-text-primary-light dark:text-text-primary-dark"
+              className="text-screen-light" // always light
             />
           </View>
         </Pressable>
@@ -37,32 +37,30 @@ export default function LogDetailScreen() {
           Log Details
         </Text>
       ),
-      headerRight: () => {
-        return (
-          <Pressable
-            onPress={() => {
-              if (log?.state === "processing") {
-                Alert.alert("Still processing", "Please wait before editing.");
-                return;
-              }
-              router.push({
-                pathname: "/(sheets)/log-edit",
-                params: { id: log?.id }, // ← only id, nothing else
-              });
-            }}
-            className="bg-chip-light dark:bg-chip-dark p-2.5 rounded-full"
-          >
-            <View pointerEvents="none">
-              <Icon
-                icon={Phosphor.PencilSimpleLineIcon}
-                size={24}
-                weight="fill"
-                className="text-text-primary-light dark:text-text-primary-dark"
-              />
-            </View>
-          </Pressable>
-        );
-      },
+      headerRight: () => (
+        <Pressable
+          onPress={() => {
+            if (log?.state === "processing") {
+              Alert.alert("Still processing", "Please wait before editing.");
+              return;
+            }
+            router.push({
+              pathname: "/(sheets)/log-edit",
+              params: { id: log?.id },
+            });
+          }}
+          className="bg-accent-light dark:bg-accent-dark p-2.5 rounded-full"
+        >
+          <View pointerEvents="none">
+            <Icon
+              icon={Phosphor.PencilSimpleLineIcon}
+              size={24}
+              weight="fill"
+              className="text-screen-light" // always light
+            />
+          </View>
+        </Pressable>
+      ),
     });
   }, [navigation, router, log]);
 

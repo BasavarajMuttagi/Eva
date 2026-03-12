@@ -4,10 +4,10 @@ export const EvaLightTheme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    primary: "#1B8C8C", // accent.light
-    background: "#F5F4EF", // screen.light
-    card: "#F5F4EF", // tab/header bg
-    text: "#1A1A1A", // text.primary.light
+    primary: "#6367FF",
+    background: "#FFF4FF", // lighter FFDBFD
+    card: "#FFF4FF",
+    text: "#1A1A1A",
     border: "#E0DED9",
   },
 };
@@ -16,8 +16,8 @@ export const EvaDarkTheme = {
   ...DarkTheme,
   colors: {
     ...DarkTheme.colors,
-    primary: "#20BFBF", // accent.dark
-    background: "#111111", // screen.dark
+    primary: "#6367FF",
+    background: "#111111",
     card: "#111111",
     text: "#F0F0F0",
     border: "#2A2A2A",

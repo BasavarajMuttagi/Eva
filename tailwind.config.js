@@ -11,13 +11,13 @@ module.exports = {
     extend: {
       colors: {
         accent: {
-          light: "#1B8C8C",
-          dark: "#20BFBF",
+          light: "#6367FF", // ColorHunt primary
+          dark: "#6367FF",
         },
 
         // app background
         screen: {
-          light: "#F5F4EF",
+          light: "#FFF4FF", // lighter FFDBFD-style pastel bg
           dark: "#111111",
         },
 
@@ -49,8 +49,8 @@ module.exports = {
         },
 
         danger: {
-          light: "#F96B6B", // your peach/red background
-          dark: "#F2A899", // your lighter peach border color
+          light: "#F96B6B",
+          dark: "#F96B6B",
         },
       },
     },

@@ -113,14 +113,14 @@ export default function ProfileScreen() {
       headerLeft: () => (
         <Pressable
           onPress={() => router.dismiss()}
-          className="bg-chip-light dark:bg-chip-dark p-2.5 rounded-full"
+          className="bg-accent-light dark:bg-accent-dark p-2.5 rounded-full"
         >
           <View pointerEvents="none">
             <Icon
               icon={Phosphor.XIcon}
               size={24}
               weight="regular"
-              className="text-text-primary-light dark:text-text-primary-dark"
+              className="text-screen-light"
             />
           </View>
         </Pressable>
@@ -137,7 +137,7 @@ export default function ProfileScreen() {
         <Pressable
           onPress={handleSubmit(onSubmit)}
           disabled={!isDirty || saving}
-          className="bg-chip-light dark:bg-chip-dark p-2.5 rounded-full"
+          className="bg-accent-light dark:bg-accent-dark p-2.5 rounded-full"
         >
           <View pointerEvents="none">
             {saving ? (
@@ -145,7 +145,7 @@ export default function ProfileScreen() {
                 icon={Phosphor.CircleNotchIcon}
                 size={24}
                 weight="regular"
-                className="text-text-primary-light dark:text-text-primary-dark"
+                className="text-screen-light"
               />
             ) : (
               <Icon
@@ -153,9 +153,7 @@ export default function ProfileScreen() {
                 size={24}
                 weight="regular"
                 className={
-                  isDirty
-                    ? "text-text-primary-light dark:text-text-primary-dark"
-                    : "text-text-secondary-light dark:text-text-secondary-dark opacity-40"
+                  isDirty ? "text-screen-light" : "text-screen-light opacity-40"
                 }
               />
             )}

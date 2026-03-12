@@ -36,14 +36,14 @@ export default function LogEditScreen() {
       headerLeft: () => (
         <Pressable
           onPress={() => router.dismiss()}
-          className="bg-chip-light dark:bg-chip-dark p-2.5 rounded-full"
+          className="bg-accent-light dark:bg-accent-dark p-2.5 rounded-full"
         >
           <View pointerEvents="none">
             <Icon
               icon={Phosphor.XIcon}
               size={24}
               weight="regular"
-              className="text-text-primary-light dark:text-text-primary-dark"
+              className="text-screen-light"
             />
           </View>
         </Pressable>
@@ -60,7 +60,7 @@ export default function LogEditScreen() {
         <Pressable
           onPress={handleSave}
           disabled={!hasChanged || saving}
-          className="bg-chip-light dark:bg-chip-dark p-2.5 rounded-full"
+          className="bg-accent-light dark:bg-accent-dark p-2.5 rounded-full"
         >
           <View pointerEvents="none">
             {saving ? (
@@ -68,7 +68,7 @@ export default function LogEditScreen() {
                 icon={Phosphor.CircleNotchIcon}
                 size={24}
                 weight="regular"
-                className="text-text-primary-light animate-spin dark:text-text-primary-dark"
+                className="text-screen-light animate-spin"
               />
             ) : (
               <Icon
@@ -77,8 +77,8 @@ export default function LogEditScreen() {
                 weight="regular"
                 className={
                   hasChanged
-                    ? "text-text-primary-light dark:text-text-primary-dark"
-                    : "text-text-secondary-light dark:text-text-secondary-dark opacity-40"
+                    ? "text-screen-light"
+                    : "text-screen-light opacity-40"
                 }
               />
             )}

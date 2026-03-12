@@ -16,16 +16,17 @@ export function SignOutButton() {
     <Pressable
       onPress={handleSignOut}
       style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-      className="mt-2 flex-row items-center bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark rounded-2xl py-4 px-5"
+      className="mt-2 flex-row items-center rounded-2xl py-4 px-5 
+                 bg-danger-light dark:bg-danger-dark"
     >
-      <Text className="text-[15px] font-semibold text-text-primary-light dark:text-text-primary-dark flex-1 text-center">
+      <Text className="text-[15px] font-semibold text-screen-light flex-1 text-center">
         Sign out
       </Text>
       <Icon
         icon={Phosphor.SignOutIcon}
         size={18}
         weight="regular"
-        className="text-text-secondary-light dark:text-text-secondary-dark"
+        className="text-screen-light"
       />
     </Pressable>
   );

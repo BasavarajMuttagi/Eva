@@ -36,7 +36,7 @@ function RightActions({
       <TouchableOpacity
         onPress={() => onDelete(item.id)}
         disabled={deletingId === item.id}
-        className="flex-1 h-full bg-red-500 justify-center items-center rounded-md"
+        className="flex-1 h-full bg-danger-light dark:bg-danger-dark justify-center items-center rounded-md"
       >
         {deletingId === item.id ? (
           <Icon

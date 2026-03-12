@@ -1,3 +1,4 @@
+// WelcomeScreen.tsx
 import Icon, { Phosphor } from "@/src/components/Icon";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
@@ -52,16 +53,16 @@ export default function WelcomeScreen() {
         <Pressable
           onPress={handleMeetEva}
           style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-          className="flex-row items-center bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark rounded-2xl py-4 px-5"
+          className="flex-row items-center bg-accent-light dark:bg-accent-dark rounded-2xl py-4 px-6"
         >
-          <Text className="text-[15px] font-semibold text-text-primary-light dark:text-text-primary-dark flex-1 text-center">
+          <Text className="text-[15px] font-semibold text-screen-light flex-1 text-center">
             Meet Eva
           </Text>
           <Icon
             icon={Phosphor.ArrowRightIcon}
             size={18}
             weight="regular"
-            className="text-text-secondary-light dark:text-text-secondary-dark"
+            className="text-screen-light"
           />
         </Pressable>
       </View>

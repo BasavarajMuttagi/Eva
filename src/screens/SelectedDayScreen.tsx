@@ -22,14 +22,14 @@ export default function SelectedDayScreen() {
       headerLeft: () => (
         <Pressable
           onPress={() => router.back()}
-          className="bg-chip-light dark:bg-chip-dark p-2.5 rounded-full"
+          className="bg-accent-light dark:bg-accent-dark p-2.5 rounded-full"
         >
           <View pointerEvents="none">
             <Icon
               icon={Phosphor.ArrowLeftIcon}
               size={24}
               weight="regular"
-              className="text-text-primary-light dark:text-text-primary-dark"
+              className="text-screen-light" // always light
             />
           </View>
         </Pressable>

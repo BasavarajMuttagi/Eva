@@ -27,7 +27,7 @@ export default function SettingsScreen() {
     setRefreshing(true);
     await sync();
     setRefreshing(false);
-  }, []);
+  }, [sync]);
 
   return (
     <ScrollView
@@ -39,12 +39,12 @@ export default function SettingsScreen() {
     >
       {/* Profile card */}
       <View className="mb-6 items-center">
-        <View className="w-16 h-16 bg-chip-light dark:bg-chip-dark rounded-full items-center justify-center">
+        <View className="w-16 h-16 bg-[#E5D4FF] dark:bg-chip-dark rounded-full items-center justify-center">
           <Icon
             icon={Phosphor.UserIcon}
             size={24}
             weight="fill"
-            className="text-text-secondary-light dark:text-text-secondary-dark"
+            className="text-text-primary-light dark:text-text-primary-dark"
           />
         </View>
         <Text className="text-text-primary-light dark:text-text-primary-dark text-base font-semibold mt-3">
@@ -63,13 +63,13 @@ export default function SettingsScreen() {
         >
           <View className="flex-1">
             <View className="flex-row items-center gap-3">
-              <View className="bg-chip-light dark:bg-chip-dark p-2 rounded-full">
+              <View className="bg-[#D4F8D4] dark:bg-chip-dark p-2 rounded-full">
                 <View pointerEvents="none">
                   <Icon
                     icon={Phosphor.UserIcon}
                     size={16}
                     weight="fill"
-                    className="text-green-400"
+                    className="text-[#15803d]"
                   />
                 </View>
               </View>
@@ -95,13 +95,13 @@ export default function SettingsScreen() {
         <Pressable className="flex-row items-center justify-between py-4 border-b border-border-light dark:border-border-dark">
           <View className="flex-1">
             <View className="flex-row items-center gap-3">
-              <View className="bg-chip-light dark:bg-chip-dark p-2 rounded-full">
+              <View className="bg-[#E5D4FF] dark:bg-chip-dark p-2 rounded-full">
                 <View pointerEvents="none">
                   <Icon
                     icon={Phosphor.KeyholeIcon}
                     size={16}
                     weight="fill"
-                    className="text-purple-400"
+                    className="text-[#6d28d9]"
                   />
                 </View>
               </View>
@@ -127,13 +127,13 @@ export default function SettingsScreen() {
         <Pressable className="flex-row items-center justify-between py-4 border-b border-border-light dark:border-border-dark">
           <View className="flex-1">
             <View className="flex-row items-center gap-3">
-              <View className="bg-chip-light dark:bg-chip-dark p-2 rounded-full">
+              <View className="bg-[#E5E7EB] dark:bg-chip-dark p-2 rounded-full">
                 <View pointerEvents="none">
                   <Icon
                     icon={Phosphor.InfoIcon}
                     size={16}
                     weight="fill"
-                    className="text-gray-400"
+                    className="text-[#4b5563]"
                   />
                 </View>
               </View>
@@ -155,13 +155,14 @@ export default function SettingsScreen() {
           />
         </Pressable>
       </View>
+
       {/* Reset + Sign out */}
       <View className="mt-8 gap-3">
         <TouchableOpacity
           onPress={async () => {
             await apiClient.post("/api/onboarding/reset");
-            clear(); // wipe Zustand store
-            await refetch(); // update session isOnboarded → false
+            clear();
+            await refetch();
           }}
           className="self-stretch rounded-full border border-border-light dark:border-border-dark py-3 px-6 items-center justify-center"
         >
@@ -170,6 +171,7 @@ export default function SettingsScreen() {
           </Text>
         </TouchableOpacity>
       </View>
+
       <SignOutButton />
     </ScrollView>
   );

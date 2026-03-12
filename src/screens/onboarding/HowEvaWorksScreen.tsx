@@ -1,3 +1,4 @@
+// HowEvaWorksScreen.tsx
 import Icon, { Phosphor } from "@/src/components/Icon";
 import { useRouter } from "expo-router";
 import React from "react";
@@ -15,19 +16,19 @@ export default function HowEvaWorksScreen() {
   };
 
   return (
-    <View className="flex-1 bg-screen-light dark:bg-screen-dark px-6 pt-16 pb-10">
+    <View className="flex-1 bg-screen-light dark:bg-screen-dark px-8 pt-16 pb-10">
       {/* Top bar: chip back button */}
       <View className="flex-row items-center justify-between mb-8">
         <Pressable
           onPress={handleBack}
-          className="bg-chip-light dark:bg-chip-dark p-2 rounded-full -ml-2"
+          className="bg-accent-light dark:bg-accent-dark p-2 rounded-full -ml-2"
           hitSlop={8}
         >
           <Icon
             icon={Phosphor.ArrowLeftIcon}
             size={24}
             weight="regular"
-            className="text-text-primary-light dark:text-text-primary-dark"
+            className="text-screen-light"
           />
         </Pressable>
       </View>
@@ -112,16 +113,16 @@ export default function HowEvaWorksScreen() {
       <Pressable
         onPress={handleContinue}
         style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-        className="flex-row items-center bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark rounded-2xl py-4 px-5"
+        className="flex-row items-center bg-accent-light dark:bg-accent-dark rounded-2xl py-4 px-6"
       >
-        <Text className="text-[15px] font-semibold text-text-primary-light dark:text-text-primary-dark flex-1 text-center">
+        <Text className="text-[15px] font-semibold text-screen-light flex-1 text-center">
           Sounds good
         </Text>
         <Icon
           icon={Phosphor.ArrowRightIcon}
           size={18}
           weight="regular"
-          className="text-text-secondary-light dark:text-text-secondary-dark"
+          className="text-screen-light"
         />
       </Pressable>
     </View>

@@ -38,14 +38,14 @@ export default function ActivityLevelScreen() {
       <View className="flex-row items-center justify-between mb-8">
         <Pressable
           onPress={handleBack}
-          className="bg-chip-light dark:bg-chip-dark p-2 rounded-full -ml-2"
+          className="bg-accent-light dark:bg-accent-dark p-2 rounded-full -ml-2"
           hitSlop={8}
         >
           <Icon
             icon={Phosphor.ArrowLeftIcon}
             size={24}
             weight="regular"
-            className="text-text-primary-light dark:text-text-primary-dark"
+            className="text-screen-light"
           />
         </Pressable>
       </View>
@@ -76,15 +76,27 @@ export default function ActivityLevelScreen() {
               onPress={() => setActivityLevel(item.key)}
               className={`flex-row items-center justify-between rounded-2xl p-4 mb-2 border ${
                 isSelected
-                  ? "bg-card-light dark:bg-card-dark border-border-light dark:border-border-dark"
-                  : "border-transparent"
+                  ? "bg-[#FFDBFD]/90 border-[#FFDBFD] dark:bg-[#FFDBFD] dark:border-[#FFDBFD]"
+                  : "bg-transparent border-transparent"
               }`}
             >
               <View className="flex-1">
-                <Text className="text-lg font-semibold text-text-primary-light dark:text-text-primary-dark">
+                <Text
+                  className={`text-lg font-semibold ${
+                    isSelected
+                      ? "text-text-primary-light dark:text-[#111111]"
+                      : "text-text-primary-light dark:text-text-primary-dark"
+                  }`}
+                >
                   {item.title}
                 </Text>
-                <Text className="mt-0.5 text-base text-text-secondary-light dark:text-text-secondary-dark">
+                <Text
+                  className={`mt-0.5 text-base ${
+                    isSelected
+                      ? "text-text-secondary-light dark:text-[#222222]"
+                      : "text-text-secondary-light dark:text-text-secondary-dark"
+                  }`}
+                >
                   {item.subtitle}
                 </Text>
               </View>
@@ -105,16 +117,16 @@ export default function ActivityLevelScreen() {
       <Pressable
         onPress={handleContinue}
         style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-        className="flex-row items-center bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark rounded-2xl py-4 px-5"
+        className="flex-row items-center bg-accent-light dark:bg-accent-dark rounded-2xl py-4 px-5"
       >
-        <Text className="text-[15px] font-semibold text-text-primary-light dark:text-text-primary-dark flex-1 text-center">
+        <Text className="text-[15px] font-semibold text-screen-light flex-1 text-center">
           Continue
         </Text>
         <Icon
           icon={Phosphor.ArrowRightIcon}
           size={18}
           weight="regular"
-          className="text-text-secondary-light dark:text-text-secondary-dark"
+          className="text-screen-light"
         />
       </Pressable>
     </View>

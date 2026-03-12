@@ -19,13 +19,6 @@ export default function OnboardingLayout() {
         }}
       />
       <Stack.Screen
-        name="callyou"
-        options={{
-          headerShown: false,
-          animation: "fade",
-        }}
-      />
-      <Stack.Screen
         name="body"
         options={{
           headerShown: false,
