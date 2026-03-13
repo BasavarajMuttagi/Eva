@@ -86,7 +86,7 @@ export default function SocialSignIn() {
     };
   }, []);
 
-  const handleLogin = async () => {
+  const handleGoogleLogin = async () => {
     await authClient.signIn
       .social({
         provider: "google",
@@ -95,6 +95,12 @@ export default function SocialSignIn() {
       .then((res) => {
         console.log(res);
       });
+  };
+  const handleAppleLogin = async () => {
+    await authClient.signIn.social({
+      provider: "apple",
+      callbackURL: "/today",
+    });
   };
 
   return (
@@ -156,9 +162,32 @@ export default function SocialSignIn() {
             </Text>
             <View className="flex-1 h-[1px] bg-border-dark/60" />
           </View>
-
+          {/* Apple */}
           <Pressable
-            onPress={handleLogin}
+            onPress={handleAppleLogin}
+            style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+            className="flex-row items-center bg-card-dark border border-border-dark rounded-2xl py-4 px-5"
+          >
+            <View className="flex-1 flex-row items-center justify-center gap-2">
+              <Icon
+                icon={Phosphor.AppleLogoIcon}
+                size={20}
+                weight="fill"
+                className="text-text-primary-dark"
+              />
+              <Text className="text-[15px] font-semibold text-text-primary-dark">
+                Continue with Apple
+              </Text>
+            </View>
+            <Icon
+              icon={Phosphor.ArrowRightIcon}
+              size={18}
+              weight="regular"
+              className="text-text-secondary-dark"
+            />
+          </Pressable>
+          <Pressable
+            onPress={handleGoogleLogin}
             style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
             className="flex-row items-center bg-card-dark border border-border-dark rounded-2xl py-4 px-5"
           >
