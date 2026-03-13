@@ -6,13 +6,60 @@ import { useLogStore } from "@/src/store/LogStore";
 import { useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
+  Alert,
   Pressable,
   RefreshControl,
   ScrollView,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
+
+type SettingsRowProps = {
+  icon: Phosphor.Icon;
+  iconBg: string;
+  iconColor: string;
+  label: string;
+  subtitle?: string;
+  onPress?: () => void;
+  destructive?: boolean;
+};
+
+function SettingsRow({
+  icon,
+  iconBg,
+  iconColor,
+  label,
+  subtitle,
+  onPress,
+  destructive,
+}: SettingsRowProps) {
+  return (
+    <Pressable onPress={onPress} className="flex-row items-center py-4 ">
+      <View
+        className="p-2 rounded-full mr-3"
+        style={{ backgroundColor: iconBg }}
+      >
+        <Icon icon={icon} size={16} weight="fill" className={iconColor} />
+      </View>
+      <View className="flex-1">
+        <Text
+          className={`text-base ${
+            destructive
+              ? "text-danger-light dark:text-danger-dark"
+              : "text-text-primary-light dark:text-text-primary-dark"
+          }`}
+        >
+          {label}
+        </Text>
+        {subtitle ? (
+          <Text className="text-text-secondary-light dark:text-text-secondary-dark text-sm mt-0.5">
+            {subtitle}
+          </Text>
+        ) : null}
+      </View>
+    </Pressable>
+  );
+}
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -38,13 +85,13 @@ export default function SettingsScreen() {
       showsVerticalScrollIndicator={false}
     >
       {/* Profile card */}
-      <View className="mb-6 items-center">
-        <View className="w-16 h-16 bg-[#E5D4FF] dark:bg-chip-dark rounded-full items-center justify-center">
+      <View className="mb-8 items-center">
+        <View className="w-16 h-16 bg-chip-light dark:bg-chip-dark rounded-full items-center justify-center">
           <Icon
             icon={Phosphor.UserIcon}
-            size={24}
+            size={28}
             weight="fill"
-            className="text-text-primary-light dark:text-text-primary-dark"
+            className="text-accent-light dark:text-accent-dark"
           />
         </View>
         <Text className="text-text-primary-light dark:text-text-primary-dark text-base font-semibold mt-3">
@@ -55,124 +102,109 @@ export default function SettingsScreen() {
         </Text>
       </View>
 
-      <View className="gap-0">
-        {/* Profile */}
-        <Pressable
+      {/* Account */}
+      <Text className="text-xs font-semibold tracking-widest uppercase text-text-secondary-light dark:text-text-secondary-dark mb-1 px-1">
+        Account
+      </Text>
+      <View>
+        <SettingsRow
+          icon={Phosphor.UserIcon}
+          iconBg="#E8E6FA"
+          iconColor="text-accent-light dark:text-accent-dark"
+          label="Profile"
+          subtitle="Height, weight, age & activity"
           onPress={() => router.push("/(sheets)/profile")}
-          className="flex-row items-center justify-between py-4 border-b border-border-light dark:border-border-dark"
-        >
-          <View className="flex-1">
-            <View className="flex-row items-center gap-3">
-              <View className="bg-[#D4F8D4] dark:bg-chip-dark p-2 rounded-full">
-                <View pointerEvents="none">
-                  <Icon
-                    icon={Phosphor.UserIcon}
-                    size={16}
-                    weight="fill"
-                    className="text-[#15803d]"
-                  />
-                </View>
-              </View>
-              <View className="flex-1">
-                <Text className="text-text-primary-light dark:text-text-primary-dark text-base">
-                  Profile
-                </Text>
-                <Text className="text-text-secondary-light dark:text-text-secondary-dark text-sm mt-0.5">
-                  Height, weight, age & activity
-                </Text>
-              </View>
-            </View>
-          </View>
-          <Icon
-            icon={Phosphor.CaretRightIcon}
-            size={16}
-            weight="bold"
-            className="text-text-secondary-light dark:text-text-secondary-dark"
-          />
-        </Pressable>
-
-        {/* Data & Privacy */}
-        <Pressable className="flex-row items-center justify-between py-4 border-b border-border-light dark:border-border-dark">
-          <View className="flex-1">
-            <View className="flex-row items-center gap-3">
-              <View className="bg-[#E5D4FF] dark:bg-chip-dark p-2 rounded-full">
-                <View pointerEvents="none">
-                  <Icon
-                    icon={Phosphor.KeyholeIcon}
-                    size={16}
-                    weight="fill"
-                    className="text-[#6d28d9]"
-                  />
-                </View>
-              </View>
-              <View className="flex-1">
-                <Text className="text-text-primary-light dark:text-text-primary-dark text-base">
-                  Data & Privacy
-                </Text>
-                <Text className="text-text-secondary-light dark:text-text-secondary-dark text-sm mt-0.5">
-                  Export, delete, permissions
-                </Text>
-              </View>
-            </View>
-          </View>
-          <Icon
-            icon={Phosphor.CaretRightIcon}
-            size={16}
-            weight="bold"
-            className="text-text-secondary-light dark:text-text-secondary-dark"
-          />
-        </Pressable>
-
-        {/* About */}
-        <Pressable className="flex-row items-center justify-between py-4 border-b border-border-light dark:border-border-dark">
-          <View className="flex-1">
-            <View className="flex-row items-center gap-3">
-              <View className="bg-[#E5E7EB] dark:bg-chip-dark p-2 rounded-full">
-                <View pointerEvents="none">
-                  <Icon
-                    icon={Phosphor.InfoIcon}
-                    size={16}
-                    weight="fill"
-                    className="text-[#4b5563]"
-                  />
-                </View>
-              </View>
-              <View className="flex-1">
-                <Text className="text-text-primary-light dark:text-text-primary-dark text-base">
-                  About Eva
-                </Text>
-                <Text className="text-text-secondary-light dark:text-text-secondary-dark text-sm mt-0.5">
-                  Version, credits, support
-                </Text>
-              </View>
-            </View>
-          </View>
-          <Icon
-            icon={Phosphor.CaretRightIcon}
-            size={16}
-            weight="bold"
-            className="text-text-secondary-light dark:text-text-secondary-dark"
-          />
-        </Pressable>
+        />
+        <SettingsRow
+          icon={Phosphor.TargetIcon}
+          iconBg="#E8E6FA"
+          iconColor="text-accent-light dark:text-accent-dark"
+          label="Nutrition goals"
+          subtitle="Daily calorie & macro targets"
+        />
       </View>
 
-      {/* Reset + Sign out */}
-      <View className="mt-8 gap-3">
-        <TouchableOpacity
+      {/* App */}
+      <Text className="text-xs font-semibold tracking-widest uppercase text-text-secondary-light dark:text-text-secondary-dark mt-8 mb-1 px-1">
+        App
+      </Text>
+      <View>
+        <SettingsRow
+          icon={Phosphor.KeyholeIcon}
+          iconBg="#E8E6FA"
+          iconColor="text-accent-light dark:text-accent-dark"
+          label="Data & Privacy"
+          subtitle="Export, delete, permissions"
+        />
+        <SettingsRow
+          icon={Phosphor.InfoIcon}
+          iconBg="#E8E6FA"
+          iconColor="text-accent-light dark:text-accent-dark"
+          label="About Eva"
+          subtitle="Version, credits, support"
+        />
+      </View>
+
+      {/* Danger zone */}
+      <Text className="text-xs font-semibold tracking-widest uppercase text-text-secondary-light dark:text-text-secondary-dark mt-8 mb-1 px-1">
+        Danger zone
+      </Text>
+      <View>
+        <SettingsRow
+          icon={Phosphor.ArrowCounterClockwiseIcon}
+          iconBg="#FFE4E4"
+          iconColor="text-danger-light dark:text-danger-dark"
+          label="Reset onboarding"
           onPress={async () => {
-            await apiClient.post("/api/onboarding/reset");
-            clear();
-            await refetch();
+            Alert.alert(
+              "Reset onboarding?",
+              "This will clear your profile and preferences.",
+              [
+                { text: "Cancel", style: "cancel" },
+                {
+                  text: "Reset",
+                  style: "destructive",
+                  onPress: async () => {
+                    await apiClient.post("/api/onboarding/reset");
+                    clear();
+                    await refetch();
+                  },
+                },
+              ],
+            );
           }}
-          className="self-stretch rounded-full border border-border-light dark:border-border-dark py-3 px-6 items-center justify-center"
-        >
-          <Text className="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">
-            Reset onboarding
-          </Text>
-        </TouchableOpacity>
+          destructive
+        />
+        <SettingsRow
+          icon={Phosphor.TrashIcon}
+          iconBg="#FFE4E4"
+          iconColor="text-danger-light dark:text-danger-dark"
+          label="Delete account"
+          subtitle="Permanently remove your data"
+          onPress={() => {
+            Alert.alert(
+              "Delete account?",
+              "Your account and all data will be permanently deleted. This cannot be undone.",
+              [
+                { text: "Cancel", style: "cancel" },
+                {
+                  text: "Delete account",
+                  style: "destructive",
+                  onPress: async () => {
+                    await authClient.deleteUser();
+                    clear();
+                  },
+                },
+              ],
+            );
+          }}
+          destructive
+        />
       </View>
 
-      <SignOutButton />
+      <View className="mt-6 mb-4">
+        <SignOutButton />
+      </View>
     </ScrollView>
   );
 }

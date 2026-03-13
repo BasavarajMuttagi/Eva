@@ -5,7 +5,6 @@ import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   KeyboardAvoidingView,
-  Platform,
   Pressable,
   ScrollView,
   Text,
@@ -54,7 +53,7 @@ export default function BodyScreen() {
   return (
     <KeyboardAvoidingView
       className="flex-1 bg-screen-light dark:bg-screen-dark"
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      behavior="padding"
     >
       <ScrollView
         className="flex-1 px-8 pt-16"
@@ -108,15 +107,15 @@ export default function BodyScreen() {
                   onPress={() => setGenderVal(opt.key)}
                   className={`flex-1 py-3 rounded-full items-center justify-center border ${
                     isSelected
-                      ? "bg-text-primary-light dark:bg-text-primary-dark border-text-primary-light dark:border-text-primary-dark"
-                      : "bg-transparent border-border-light dark:border-border-dark"
+                      ? "bg-accent-light dark:bg-accent-dark border-accent-light dark:border-accent-dark"
+                      : "bg-chip-light dark:bg-card-dark border-chip-light dark:border-border-dark"
                   }`}
                 >
                   <Text
                     className={`text-sm font-semibold ${
                       isSelected
-                        ? "text-screen-light dark:text-screen-dark"
-                        : "text-text-secondary-light dark:text-text-secondary-dark"
+                        ? "text-screen-light"
+                        : "text-text-primary-light dark:text-text-primary-dark"
                     }`}
                   >
                     {opt.label}
@@ -139,7 +138,7 @@ export default function BodyScreen() {
               onChangeText={setAgeVal}
               keyboardType="numeric"
               placeholder="28"
-              placeholderTextColor="#6B6B6B"
+              placeholderTextColor="#9CA3AF"
               className="flex-1 text-5xl font-semibold text-text-primary-light dark:text-text-primary-dark"
             />
             <Text className="ml-4 text-base font-semibold text-text-primary-light dark:text-text-primary-dark">
@@ -161,7 +160,7 @@ export default function BodyScreen() {
               onChangeText={setHeightVal}
               keyboardType="numeric"
               placeholder="170"
-              placeholderTextColor="#6B6B6B"
+              placeholderTextColor="#9CA3AF"
               className="flex-1 text-5xl font-semibold text-text-primary-light dark:text-text-primary-dark"
             />
             <Text className="ml-4 text-base font-semibold text-text-primary-light dark:text-text-primary-dark">
@@ -183,7 +182,7 @@ export default function BodyScreen() {
               onChangeText={setWeightVal}
               keyboardType="numeric"
               placeholder="70"
-              placeholderTextColor="#6B6B6B"
+              placeholderTextColor="#9CA3AF"
               className="flex-1 text-5xl font-semibold text-text-primary-light dark:text-text-primary-dark"
             />
             <Text className="ml-4 text-base font-semibold text-text-primary-light dark:text-text-primary-dark">

@@ -9,7 +9,6 @@ import { Controller, useForm } from "react-hook-form";
 import {
   Alert,
   KeyboardAvoidingView,
-  Platform,
   Pressable,
   ScrollView,
   Text,
@@ -180,13 +179,10 @@ export default function ProfileScreen() {
       .catch(() => {
         // 404 = not onboarded yet
       });
-  }, [userId]);
+  }, [userId, reset]);
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-    >
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
       <ScrollView
         className="flex-1 bg-screen-light dark:bg-screen-dark"
         contentContainerClassName="px-6 pt-6 pb-16"
@@ -213,27 +209,30 @@ export default function ProfileScreen() {
             name="gender"
             render={({ field: { onChange, value } }) => (
               <View className="flex-row gap-2">
-                {GENDER_VALUES.map((g) => (
-                  <Pressable
-                    key={g}
-                    onPress={() => onChange(g)}
-                    className={`flex-1 py-2 rounded-full items-center border ${
-                      value === g
-                        ? "bg-text-primary-light dark:bg-text-primary-dark border-text-primary-light dark:border-text-primary-dark"
-                        : "border-border-light dark:border-border-dark"
-                    }`}
-                  >
-                    <Text
-                      className={`text-sm font-semibold ${
-                        value === g
-                          ? "text-screen-light dark:text-screen-dark"
-                          : "text-text-secondary-light dark:text-text-secondary-dark"
+                {GENDER_VALUES.map((g) => {
+                  const selected = value === g;
+                  return (
+                    <Pressable
+                      key={g}
+                      onPress={() => onChange(g)}
+                      className={`flex-1 py-2 rounded-full items-center border ${
+                        selected
+                          ? "bg-accent-light dark:bg-accent-dark border-accent-light dark:border-accent-dark"
+                          : "bg-chip-light dark:bg-card-dark border-chip-light dark:border-border-dark"
                       }`}
                     >
-                      {GENDER_LABELS[g]}
-                    </Text>
-                  </Pressable>
-                ))}
+                      <Text
+                        className={`text-sm font-semibold ${
+                          selected
+                            ? "text-screen-light"
+                            : "text-text-primary-light dark:text-text-primary-dark"
+                        }`}
+                      >
+                        {GENDER_LABELS[g]}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
               </View>
             )}
           />
@@ -253,7 +252,7 @@ export default function ProfileScreen() {
                 onChangeText={onChange}
                 keyboardType="numeric"
                 placeholder="e.g. 25"
-                placeholderTextColor="#6B6B6B"
+                placeholderTextColor="#9CA3AF"
                 className="text-text-primary-light dark:text-text-primary-dark text-base border-b border-border-light dark:border-border-dark py-2"
               />
             )}
@@ -279,7 +278,7 @@ export default function ProfileScreen() {
                 onChangeText={onChange}
                 keyboardType="numeric"
                 placeholder="e.g. 175"
-                placeholderTextColor="#6B6B6B"
+                placeholderTextColor="#9CA3AF"
                 className="text-text-primary-light dark:text-text-primary-dark text-base border-b border-border-light dark:border-border-dark py-2"
               />
             )}
@@ -305,7 +304,7 @@ export default function ProfileScreen() {
                 onChangeText={onChange}
                 keyboardType="numeric"
                 placeholder="e.g. 70"
-                placeholderTextColor="#6B6B6B"
+                placeholderTextColor="#9CA3AF"
                 className="text-text-primary-light dark:text-text-primary-dark text-base border-b border-border-light dark:border-border-dark py-2"
               />
             )}
@@ -327,27 +326,30 @@ export default function ProfileScreen() {
             name="activityLevel"
             render={({ field: { onChange, value } }) => (
               <View className="flex-row flex-wrap gap-2">
-                {ACTIVITY_VALUES.map((a) => (
-                  <Pressable
-                    key={a}
-                    onPress={() => onChange(a)}
-                    className={`py-2 px-3 rounded-full border ${
-                      value === a
-                        ? "bg-text-primary-light dark:bg-text-primary-dark border-text-primary-light dark:border-text-primary-dark"
-                        : "border-border-light dark:border-border-dark"
-                    }`}
-                  >
-                    <Text
-                      className={`text-sm font-semibold ${
-                        value === a
-                          ? "text-screen-light dark:text-screen-dark"
-                          : "text-text-secondary-light dark:text-text-secondary-dark"
+                {ACTIVITY_VALUES.map((a) => {
+                  const selected = value === a;
+                  return (
+                    <Pressable
+                      key={a}
+                      onPress={() => onChange(a)}
+                      className={`py-2 px-3 rounded-full border ${
+                        selected
+                          ? "bg-accent-light dark:bg-accent-dark border-accent-light dark:border-accent-dark"
+                          : "bg-chip-light dark:bg-card-dark border-chip-light dark:border-border-dark"
                       }`}
                     >
-                      {ACTIVITY_LABELS[a]}
-                    </Text>
-                  </Pressable>
-                ))}
+                      <Text
+                        className={`text-sm font-semibold ${
+                          selected
+                            ? "text-screen-light"
+                            : "text-text-primary-light dark:text-text-primary-dark"
+                        }`}
+                      >
+                        {ACTIVITY_LABELS[a]}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
               </View>
             )}
           />

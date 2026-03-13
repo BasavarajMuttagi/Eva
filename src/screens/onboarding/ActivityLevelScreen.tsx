@@ -34,7 +34,7 @@ export default function ActivityLevelScreen() {
 
   return (
     <View className="flex-1 bg-screen-light dark:bg-screen-dark px-6 pt-16 pb-10">
-      {/* Top bar: chip back */}
+      {/* Top bar: back */}
       <View className="flex-row items-center justify-between mb-8">
         <Pressable
           onPress={handleBack}
@@ -76,7 +76,7 @@ export default function ActivityLevelScreen() {
               onPress={() => setActivityLevel(item.key)}
               className={`flex-row items-center justify-between rounded-2xl p-4 mb-2 border ${
                 isSelected
-                  ? "bg-[#FFDBFD]/90 border-[#FFDBFD] dark:bg-[#FFDBFD] dark:border-[#FFDBFD]"
+                  ? "bg-chip-light dark:bg-chip-dark border-chip-light dark:border-chip-dark"
                   : "bg-transparent border-transparent"
               }`}
             >
@@ -84,7 +84,7 @@ export default function ActivityLevelScreen() {
                 <Text
                   className={`text-lg font-semibold ${
                     isSelected
-                      ? "text-text-primary-light dark:text-[#111111]"
+                      ? "text-text-primary-light dark:text-text-primary-dark"
                       : "text-text-primary-light dark:text-text-primary-dark"
                   }`}
                 >
@@ -93,7 +93,7 @@ export default function ActivityLevelScreen() {
                 <Text
                   className={`mt-0.5 text-base ${
                     isSelected
-                      ? "text-text-secondary-light dark:text-[#222222]"
+                      ? "text-text-secondary-light dark:text-text-secondary-dark"
                       : "text-text-secondary-light dark:text-text-secondary-dark"
                   }`}
                 >

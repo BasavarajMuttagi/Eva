@@ -56,7 +56,7 @@ export default function LogMissedDayScreen() {
   return (
     <View className="flex-1 bg-screen-light dark:bg-screen-dark px-5 pt-4 pb-10">
       {/* Info card */}
-      <View className="bg-accent-dark/20 rounded-2xl p-4 mb-6 flex-row gap-3">
+      <View className="bg-chip-light dark:bg-chip-dark rounded-2xl p-4 mb-6 flex-row gap-3">
         <Icon
           icon={Phosphor.CalendarBlankIcon}
           size={24}
@@ -87,7 +87,7 @@ export default function LogMissedDayScreen() {
               setSelectedDate(date);
             }
           }}
-          accentColor="#C87BA0"
+          accentColor="#6367FF"
         />
       </View>
 
