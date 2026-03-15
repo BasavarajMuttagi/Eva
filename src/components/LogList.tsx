@@ -1,11 +1,13 @@
+// src/components/LogList.tsx
 import Icon, { Phosphor } from "@/src/components/Icon";
 import { apiClient } from "@/src/lib/apiClient";
 import { authClient } from "@/src/lib/auth-client";
 import type { FoodLog } from "@/src/store/LogStore";
 import { useLogStore } from "@/src/store/LogStore";
+import { usePreferencesStore } from "@/src/store/PreferencesStore";
 import { format } from "date-fns";
-import { useRouter } from "expo-router";
-import { useRef, useState } from "react";
+import { useNavigation, useRouter } from "expo-router";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   FlatList,
@@ -21,6 +23,8 @@ import Swipeable, {
 } from "react-native-gesture-handler/ReanimatedSwipeable";
 import "react-native-get-random-values";
 import { v4 as uuidv4 } from "uuid";
+
+// ─── Swipeable helpers ────────────────────────────────────────────────────────
 
 function RightActions({
   item,
@@ -108,7 +112,6 @@ function LogRowMeta({ log }: { log: FoodLog }) {
   );
 }
 
-// ─── SwipeableRow ─────────────────────────────────────────────────────────────
 function SwipeableRow({
   item,
   deletingId,
@@ -160,6 +163,8 @@ function SwipeableRow({
   );
 }
 
+// ─── LogList ──────────────────────────────────────────────────────────────────
+
 type Props = {
   date: Date;
   showRefresh?: boolean;
@@ -176,14 +181,84 @@ export function LogList({
   const { data: session } = authClient.useSession();
   const userId = session?.user?.id ?? "";
   const { logs, addLog, removeLog, sync, syncing } = useLogStore();
-
-  const dateKey = format(date, "yyyy-MM-dd");
-  const dayLogs = logs.filter(
-    (l) => format(new Date(l.createdAt), "yyyy-MM-dd") === dateKey,
-  );
+  const { prefs } = usePreferencesStore();
+  const navigation = useNavigation();
+  const router = useRouter();
 
   const [input, setInput] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const dateKey = format(date, "yyyy-MM-dd");
+
+  const dayLogs = useMemo(
+    () =>
+      logs.filter(
+        (l) => format(new Date(l.createdAt), "yyyy-MM-dd") === dateKey,
+      ),
+    [logs, dateKey],
+  );
+
+  const actual = useMemo(() => {
+    const done = dayLogs.filter((l) => l.state === "done");
+    return {
+      calories: done.reduce((s, l) => s + l.totalCalories, 0),
+      protein: done.reduce((s, l) => s + l.totalProtein, 0),
+      carbs: done.reduce((s, l) => s + l.totalCarbs, 0),
+      fat: done.reduce((s, l) => s + l.totalFat, 0),
+    };
+  }, [dayLogs]);
+
+  const target = useMemo(
+    () => ({
+      calories: prefs?.targetCalories ?? 0,
+      protein: prefs?.targetProtein ?? 0,
+      carbs: prefs?.targetCarbs ?? 0,
+      fat: prefs?.targetFat ?? 0,
+    }),
+    [prefs],
+  );
+
+  const hasAnyDone = dayLogs.some((l) => l.state === "done");
+
+  const openNutrition = () => {
+    router.push({
+      pathname: "/(sheets)/nutrition",
+      params: {
+        actualCalories: actual.calories,
+        actualProtein: actual.protein,
+        actualCarbs: actual.carbs,
+        actualFat: actual.fat,
+        targetCalories: target.calories,
+        targetProtein: target.protein,
+        targetCarbs: target.carbs,
+        targetFat: target.fat,
+      },
+    });
+  };
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight:
+        hasAnyDone && prefs
+          ? () => (
+              <Pressable
+                onPress={openNutrition}
+                style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                className="border-[1px] border-[#C9BEFF] rounded-full"
+              >
+                <View className="bg-chip-light dark:bg-chip-dark flex-row items-baseline gap-1 px-4 py-2 rounded-full">
+                  <Text className="text-text-primary-light dark:text-text-primary-dark text-md font-bold">
+                    {Math.round(actual.calories).toLocaleString()}
+                  </Text>
+                  <Text className="text-text-secondary-light dark:text-text-secondary-dark text-xs font-normal">
+                    kcal
+                  </Text>
+                </View>
+              </Pressable>
+            )
+          : undefined,
+    });
+  }, [hasAnyDone, prefs, actual.calories]);
 
   const handleAdd = async () => {
     if (!input.trim()) return;
@@ -223,7 +298,6 @@ export function LogList({
           onChangeText={setInput}
           placeholder="What did you eat?"
           placeholderTextColor="#6B6B6B"
-          placeholderClassName="text-lg"
           className="flex-1 text-lg text-text-primary-light dark:text-text-primary-dark"
           style={{ lineHeight: undefined }}
           onSubmitEditing={handleAdd}

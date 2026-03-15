@@ -3,12 +3,12 @@ import { useLogStore } from "@/src/store/LogStore";
 import React from "react";
 import { Pressable, Text } from "react-native";
 import { authClient } from "../lib/auth-client";
+import { usePreferencesStore } from "../store/PreferencesStore";
 
 export function SignOutButton() {
-  const { clear } = useLogStore();
-
   const handleSignOut = async () => {
-    clear();
+    useLogStore.getState().clear();
+    usePreferencesStore.getState().clear();
     await authClient.signOut();
   };
 

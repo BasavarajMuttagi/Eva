@@ -12,6 +12,7 @@ export default function SheetLayout() {
       <Stack.Screen name="log-edit" />
       <Stack.Screen name="profile" />
       <Stack.Screen name="search" />
+      <Stack.Screen name="nutrition" />
     </Stack>
   );
 }

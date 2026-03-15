@@ -13,6 +13,8 @@ import {
   Text,
   View,
 } from "react-native";
+import { useOnboardingData } from "../store/OnboardingData";
+import { usePreferencesStore } from "../store/PreferencesStore";
 
 type SettingsRowProps = {
   icon: Phosphor.Icon;
@@ -115,13 +117,6 @@ export default function SettingsScreen() {
           subtitle="Height, weight, age & activity"
           onPress={() => router.push("/(sheets)/profile")}
         />
-        <SettingsRow
-          icon={Phosphor.TargetIcon}
-          iconBg="#E8E6FA"
-          iconColor="text-accent-light dark:text-accent-dark"
-          label="Nutrition goals"
-          subtitle="Daily calorie & macro targets"
-        />
       </View>
 
       {/* App */}
@@ -166,7 +161,8 @@ export default function SettingsScreen() {
                   style: "destructive",
                   onPress: async () => {
                     await apiClient.post("/api/onboarding/reset");
-                    clear();
+                    useOnboardingData.getState().reset();
+                    usePreferencesStore.getState().clear();
                     await refetch();
                   },
                 },

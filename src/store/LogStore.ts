@@ -1,4 +1,3 @@
-// src/store/LogStore.ts
 import { create } from "zustand";
 import { apiClient } from "../lib/apiClient";
 
@@ -79,7 +78,21 @@ export const useLogStore = create<LogStore>((set, get) => ({
     try {
       const since = Date.now() - 30 * 24 * 60 * 60 * 1000;
       const res = await apiClient.get(`/api/logs?since=${since}`);
-      set({ logs: res.data, since, syncing: false });
+      const incoming: FoodLog[] = res.data;
+
+      // FIX 2 — merge: preserve processing logs that haven't come back from server yet
+      // Server won't have them in a done state until AI finishes
+      set((state) => {
+        const serverIds = new Set(incoming.map((l) => l.id));
+        const localProcessing = state.logs.filter(
+          (l) => l.state === "processing" && !serverIds.has(l.id),
+        );
+        return {
+          logs: [...localProcessing, ...incoming],
+          since,
+          syncing: false,
+        };
+      });
     } catch {
       set({ syncing: false });
     }
@@ -90,12 +103,17 @@ export const useLogStore = create<LogStore>((set, get) => ({
     if (!hasMore || logs.length === 0) return;
 
     const before = new Date(logs.at(-1)!.createdAt).getTime();
-    const res = await apiClient.get(`/api/logs/older?before=${before}`);
 
-    set((state) => ({
-      logs: [...state.logs, ...res.data.logs],
-      hasMore: res.data.hasMore,
-    }));
+    // FIX 1 — was missing try/catch entirely
+    try {
+      const res = await apiClient.get(`/api/logs/older?before=${before}`);
+      set((state) => ({
+        logs: [...state.logs, ...res.data.logs],
+        hasMore: res.data.hasMore,
+      }));
+    } catch {
+      // silently fail — user can scroll up again to retry
+    }
   },
 
   upsertLog: (log) =>
@@ -145,7 +163,6 @@ export const useLogStore = create<LogStore>((set, get) => ({
         createdAt: now,
         version: 1,
       });
-
       if (res.data.log) get().upsertLog(res.data.log);
     } catch (err: any) {
       if (err.message === "OFFLINE") return;
@@ -170,7 +187,6 @@ export const useLogStore = create<LogStore>((set, get) => ({
         createdAt: log.createdAt,
         version: log.version,
       });
-
       if (res.data.log) get().upsertLog(res.data.log);
     } catch (err: any) {
       if (err.message === "OFFLINE") return;
@@ -208,7 +224,6 @@ export const useLogStore = create<LogStore>((set, get) => ({
         rawText,
         version: newVersion,
       });
-
       if (res.data.log) get().upsertLog(res.data.log);
     } catch (err: any) {
       if (err.message === "OFFLINE") return;

@@ -21,15 +21,15 @@ const ProfileSchema = z.object({
   heightCm: z
     .string()
     .min(1, "Required")
-    .refine((v) => Number(v) >= 50 && Number(v) <= 300, "Enter 50–300 cm"),
+    .refine((v) => Number(v) >= 100 && Number(v) <= 250, "Enter 100–250 cm"),
   weightKg: z
     .string()
     .min(1, "Required")
-    .refine((v) => Number(v) >= 20 && Number(v) <= 500, "Enter 20–500 kg"),
+    .refine((v) => Number(v) >= 20 && Number(v) <= 300, "Enter 20–300 kg"),
   age: z
     .string()
     .min(1, "Required")
-    .refine((v) => Number(v) >= 10 && Number(v) <= 120, "Enter 10–120"),
+    .refine((v) => Number(v) >= 18 && Number(v) <= 100, "Enter 18–100"),
   gender: z.enum(GENDER_VALUES),
   activityLevel: z.enum(ACTIVITY_VALUES),
 });
@@ -364,8 +364,7 @@ export default function ProfileScreen() {
             className="text-text-secondary-light dark:text-text-secondary-dark opacity-50 mt-0.5"
           />
           <Text className="text-text-secondary-light dark:text-text-secondary-dark text-xs opacity-50 flex-1">
-            Accurate info helps Eva calculate better calorie and nutrition goals
-            for you.
+            Accurate info helps Eva understand your body better.
           </Text>
         </View>
       </ScrollView>

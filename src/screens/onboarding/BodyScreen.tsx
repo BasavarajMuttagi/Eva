@@ -33,20 +33,35 @@ export default function BodyScreen() {
   const [ageVal, setAgeVal] = useState("");
   const [genderVal, setGenderVal] = useState<Gender>("male");
 
-  const handleBack = () => {
-    router.back();
-  };
+  const heightNum = parseFloat(heightVal);
+  const weightNum = parseFloat(weightVal);
+  const ageNum = parseInt(ageVal, 10);
 
-  const isDisabled = !heightVal.trim() || !weightVal.trim() || !ageVal.trim();
+  const heightError =
+    heightVal.trim() !== "" &&
+    (isNaN(heightNum) || heightNum < 100 || heightNum > 250);
+  const weightError =
+    weightVal.trim() !== "" &&
+    (isNaN(weightNum) || weightNum < 20 || weightNum > 300);
+  const ageError =
+    ageVal.trim() !== "" && (isNaN(ageNum) || ageNum < 18 || ageNum > 100);
+
+  const isDisabled =
+    !heightVal.trim() ||
+    !weightVal.trim() ||
+    !ageVal.trim() ||
+    heightError ||
+    weightError ||
+    ageError;
+
+  const handleBack = () => router.back();
 
   const handleContinue = () => {
     if (isDisabled) return;
-
-    setHeight(parseFloat(heightVal));
-    setWeight(parseFloat(weightVal));
-    setAge(parseInt(ageVal, 10));
+    setHeight(heightNum);
+    setWeight(weightNum);
+    setAge(ageNum);
     setGender(genderVal);
-
     router.push("/(onboarding)/activity");
   };
 
@@ -146,6 +161,11 @@ export default function BodyScreen() {
             </Text>
           </View>
           <View className="h-[1px] bg-border-light dark:bg-border-dark mt-2" />
+          {ageError && (
+            <Text className="text-danger-light dark:text-danger-dark text-xs mt-2">
+              Enter 18–100
+            </Text>
+          )}
         </View>
 
         {/* Height input */}
@@ -168,6 +188,11 @@ export default function BodyScreen() {
             </Text>
           </View>
           <View className="h-[1px] bg-border-light dark:bg-border-dark mt-2" />
+          {heightError && (
+            <Text className="text-danger-light dark:text-danger-dark text-xs mt-2">
+              Enter 100–250 cm
+            </Text>
+          )}
         </View>
 
         {/* Weight input */}
@@ -190,6 +215,11 @@ export default function BodyScreen() {
             </Text>
           </View>
           <View className="h-[1px] bg-border-light dark:bg-border-dark mt-2" />
+          {weightError && (
+            <Text className="text-danger-light dark:text-danger-dark text-xs mt-2">
+              Enter 20–300 kg
+            </Text>
+          )}
         </View>
       </ScrollView>
 
