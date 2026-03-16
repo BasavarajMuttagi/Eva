@@ -1,4 +1,5 @@
 import { NavHeader, StatRow } from "@/src/components/insights/shared";
+import { useAccountStart } from "@/src/lib/accountStart";
 import { useInsightsStore } from "@/src/store/InsightsStore";
 import { useLogStore } from "@/src/store/LogStore";
 import {
@@ -23,10 +24,12 @@ function ConsistencyCalendar({
   month,
   loggedDays,
   onDayPress,
+  accountStart,
 }: {
   month: Date;
   loggedDays: Set<string>;
   onDayPress: (date: Date) => void;
+  accountStart: Date;
 }) {
   const start = startOfMonth(month);
   const end = endOfMonth(month);
@@ -58,12 +61,13 @@ function ConsistencyCalendar({
           const logged = loggedDays.has(key);
           const todayDay = isToday(day);
           const future = day > new Date();
+          const beforeStart = day < accountStart;
 
           return (
             <Pressable
               key={key}
               onPress={() => {
-                if (logged) onDayPress(day);
+                if (logged && !beforeStart) onDayPress(day);
               }}
               style={{ width: "14.28%", alignItems: "center", marginBottom: 6 }}
             >
@@ -77,7 +81,7 @@ function ConsistencyCalendar({
                   backgroundColor: logged ? "#6367FF" : "transparent",
                   borderWidth: todayDay && !logged ? 1.5 : 0,
                   borderColor: "#6367FF",
-                  opacity: !inMonth || future ? 0.2 : 1,
+                  opacity: !inMonth || future || beforeStart ? 0.2 : 1,
                 }}
               >
                 <Text
@@ -106,6 +110,7 @@ export default function MonthScreen() {
   const { logs } = useLogStore();
   const { selectedMonth, setSelectedMonth, setSelectedDate, setSelectedWeek } =
     useInsightsStore();
+  const accountStart = useAccountStart();
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -149,6 +154,7 @@ export default function MonthScreen() {
     topFood !== "—" ? topFood.charAt(0).toUpperCase() + topFood.slice(1) : "—";
 
   const canGoNext = !isSameMonth(selectedMonth, new Date());
+  const canGoPrev = !isSameMonth(selectedMonth, accountStart);
 
   const handleDayPress = (date: Date) => {
     // Sync both selectedDate and selectedWeek so Day and Week tabs
@@ -166,7 +172,11 @@ export default function MonthScreen() {
     >
       <NavHeader
         label={format(selectedMonth, "MMMM yyyy")}
-        onPrev={() => setSelectedMonth(subMonths(selectedMonth, 1))}
+        onPrev={() => {
+          if (canGoPrev) {
+            setSelectedMonth(subMonths(selectedMonth, 1));
+          }
+        }}
         onNext={() => setSelectedMonth(addMonths(selectedMonth, 1))}
         canGoNext={canGoNext}
       />
@@ -175,6 +185,7 @@ export default function MonthScreen() {
         month={selectedMonth}
         loggedDays={loggedDaysSet}
         onDayPress={handleDayPress}
+        accountStart={accountStart}
       />
 
       <View className="bg-chip-light dark:bg-chip-dark rounded-2xl px-4 mt-6">

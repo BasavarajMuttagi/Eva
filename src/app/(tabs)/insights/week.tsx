@@ -3,6 +3,7 @@ import {
   NavHeader,
   StatRow,
 } from "@/src/components/insights/shared";
+import { useAccountStart } from "@/src/lib/accountStart";
 import { useInsightsStore } from "@/src/store/InsightsStore";
 import { useLogStore } from "@/src/store/LogStore";
 import { usePreferencesStore } from "@/src/store/PreferencesStore";
@@ -141,6 +142,7 @@ export default function WeekScreen() {
   const { logs } = useLogStore();
   const { prefs } = usePreferencesStore();
   const { selectedWeek, setSelectedWeek } = useInsightsStore();
+  const accountStart = useAccountStart();
 
   const targets = {
     calories: prefs?.targetCalories ?? 0,
@@ -191,6 +193,7 @@ export default function WeekScreen() {
       : 0;
 
   const canGoNext = weekEnd < new Date();
+  const canGoPrev = weekStart > accountStart;
 
   return (
     <ScrollView
@@ -200,7 +203,11 @@ export default function WeekScreen() {
     >
       <NavHeader
         label={`${format(weekStart, "MMM d")} – ${format(weekEnd, "MMM d")}`}
-        onPrev={() => setSelectedWeek(subWeeks(selectedWeek, 1))}
+        onPrev={() => {
+          if (canGoPrev) {
+            setSelectedWeek(subWeeks(selectedWeek, 1));
+          }
+        }}
         onNext={() => setSelectedWeek(addWeeks(selectedWeek, 1))}
         canGoNext={canGoNext}
       />

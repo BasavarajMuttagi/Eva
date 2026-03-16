@@ -4,18 +4,25 @@ import { format } from "date-fns";
 import { useNavigation, useRouter } from "expo-router";
 import { useLayoutEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
+import { useAccountStart } from "../lib/accountStart";
 
 export default function LogMissedDayScreen() {
   const router = useRouter();
   const navigation = useNavigation();
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  yesterday.setHours(0, 0, 0, 0);
-
-  const [selectedDate, setSelectedDate] = useState(yesterday);
+  const accountStart = useAccountStart();
 
   const today = new Date();
   today.setHours(23, 59, 59, 999);
+
+  // Default to yesterday, but not before accountStart
+  const initialDate = (() => {
+    const y = new Date();
+    y.setDate(y.getDate() - 1);
+    y.setHours(0, 0, 0, 0);
+    return y < accountStart ? accountStart : y;
+  })();
+
+  const [selectedDate, setSelectedDate] = useState(initialDate);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -80,6 +87,7 @@ export default function LogMissedDayScreen() {
           value={selectedDate}
           mode="date"
           display="inline"
+          minimumDate={accountStart}
           maximumDate={today}
           onChange={(_, date) => {
             if (date) {
