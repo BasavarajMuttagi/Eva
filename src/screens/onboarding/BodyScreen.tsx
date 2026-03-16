@@ -17,7 +17,6 @@ type Gender = (typeof GENDER_VALUES)[number];
 const GENDER_OPTIONS: { key: Gender; label: string }[] = [
   { key: "male", label: "Male" },
   { key: "female", label: "Female" },
-  { key: "other", label: "Other" },
 ];
 
 export default function BodyScreen() {

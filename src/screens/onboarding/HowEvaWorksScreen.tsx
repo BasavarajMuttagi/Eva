@@ -34,7 +34,7 @@ export default function HowEvaWorksScreen() {
       </View>
 
       {/* Main content centered vertically */}
-      <View className="flex-1 justify-center">
+      <View className="flex-1">
         {/* Title */}
         <View className="pr-6 mb-10">
           <Text

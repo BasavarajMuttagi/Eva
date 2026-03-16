@@ -244,7 +244,6 @@ export function LogList({
               <Pressable
                 onPress={openNutrition}
                 style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-                className="border-[1px] border-[#C9BEFF] rounded-full"
               >
                 <View className="bg-chip-light dark:bg-chip-dark flex-row items-baseline gap-1 px-4 py-2 rounded-full">
                   <Text className="text-text-primary-light dark:text-text-primary-dark text-md font-bold">

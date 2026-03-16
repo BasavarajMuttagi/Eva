@@ -39,7 +39,6 @@ type ProfileForm = z.infer<typeof ProfileSchema>;
 const GENDER_LABELS: Record<(typeof GENDER_VALUES)[number], string> = {
   male: "Male",
   female: "Female",
-  other: "Other",
 };
 
 const ACTIVITY_LABELS: Record<(typeof ACTIVITY_VALUES)[number], string> = {

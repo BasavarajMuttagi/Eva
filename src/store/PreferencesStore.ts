@@ -5,7 +5,7 @@ export type Preferences = {
   heightCm: number;
   weightKg: number;
   age: number;
-  gender: "male" | "female" | "other";
+  gender: "male" | "female";
   activityLevel: "sedentary" | "light" | "moderate" | "active" | "very_active";
   targetCalories: number;
   targetProtein: number;

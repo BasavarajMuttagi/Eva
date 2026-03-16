@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { apiClient } from "../lib/apiClient";
 
-export const GENDER_VALUES = ["male", "female", "other"] as const;
+export const GENDER_VALUES = ["male", "female"] as const;
 export const ACTIVITY_VALUES = [
   "sedentary",
   "light",
