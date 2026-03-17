@@ -10,7 +10,6 @@ export default function LogMissedDayScreen() {
   const router = useRouter();
   const navigation = useNavigation();
   const accountStartDay = useAccountStartDay();
-  console.log(accountStartDay);
   const today = endOfDay(new Date());
 
   // Default to yesterday, but not before accountStartDay

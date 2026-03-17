@@ -87,14 +87,10 @@ export default function SocialSignIn() {
   }, []);
 
   const handleGoogleLogin = async () => {
-    await authClient.signIn
-      .social({
-        provider: "google",
-        callbackURL: "/today",
-      })
-      .then((res) => {
-        console.log(res);
-      });
+    await authClient.signIn.social({
+      provider: "google",
+      callbackURL: "/today",
+    });
   };
   const handleAppleLogin = async () => {
     await authClient.signIn.social({

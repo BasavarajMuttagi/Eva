@@ -54,10 +54,6 @@ export default function DayScreen() {
   // allow prev only if selectedDay is strictly AFTER the accountStartDay
   const canGoPrev = isAfter(selectedDay, accountStartDay);
 
-  console.log("accountStartDay", accountStartDay);
-  console.log("selectedDay", selectedDay);
-  console.log("canGoPrev", canGoPrev);
-
   return (
     <ScrollView
       className="flex-1 bg-screen-light dark:bg-screen-dark"
