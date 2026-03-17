@@ -1,9 +1,10 @@
+// week.tsx
 import {
   DonutSection,
   NavHeader,
   StatRow,
 } from "@/src/components/insights/shared";
-import { useAccountStart } from "@/src/lib/accountStart";
+import { useAccountStartDay } from "@/src/lib/accountStart";
 import { useInsightsStore } from "@/src/store/InsightsStore";
 import { useLogStore } from "@/src/store/LogStore";
 import { usePreferencesStore } from "@/src/store/PreferencesStore";
@@ -12,6 +13,8 @@ import {
   eachDayOfInterval,
   endOfWeek,
   format,
+  isAfter,
+  startOfDay,
   startOfWeek,
   subWeeks,
 } from "date-fns";
@@ -142,7 +145,9 @@ export default function WeekScreen() {
   const { logs } = useLogStore();
   const { prefs } = usePreferencesStore();
   const { selectedWeek, setSelectedWeek } = useInsightsStore();
-  const accountStart = useAccountStart();
+  const rawAccountStartDay = useAccountStartDay();
+
+  const accountStartDay = startOfDay(rawAccountStartDay);
 
   const targets = {
     calories: prefs?.targetCalories ?? 0,
@@ -193,7 +198,11 @@ export default function WeekScreen() {
       : 0;
 
   const canGoNext = weekEnd < new Date();
-  const canGoPrev = weekStart > accountStart;
+
+  // From accountStartDay (inclusive), nothing previous:
+  // week is allowed to go prev only if its start is AFTER accountStartDay
+  const weekStartDay = startOfDay(weekStart);
+  const canGoPrev = isAfter(weekStartDay, accountStartDay);
 
   return (
     <ScrollView
@@ -210,6 +219,7 @@ export default function WeekScreen() {
         }}
         onNext={() => setSelectedWeek(addWeeks(selectedWeek, 1))}
         canGoNext={canGoNext}
+        canGoPrev={canGoPrev}
       />
 
       <DonutSection

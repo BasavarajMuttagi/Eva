@@ -1,25 +1,23 @@
 import Icon, { Phosphor } from "@/src/components/Icon";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { format } from "date-fns";
+import { endOfDay, format, startOfDay } from "date-fns";
 import { useNavigation, useRouter } from "expo-router";
 import { useLayoutEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
-import { useAccountStart } from "../lib/accountStart";
+import { useAccountStartDay } from "../lib/accountStart";
 
 export default function LogMissedDayScreen() {
   const router = useRouter();
   const navigation = useNavigation();
-  const accountStart = useAccountStart();
+  const accountStartDay = useAccountStartDay();
+  console.log(accountStartDay);
+  const today = endOfDay(new Date());
 
-  const today = new Date();
-  today.setHours(23, 59, 59, 999);
-
-  // Default to yesterday, but not before accountStart
+  // Default to yesterday, but not before accountStartDay
   const initialDate = (() => {
-    const y = new Date();
+    const y = startOfDay(new Date());
     y.setDate(y.getDate() - 1);
-    y.setHours(0, 0, 0, 0);
-    return y < accountStart ? accountStart : y;
+    return y < accountStartDay ? accountStartDay : y;
   })();
 
   const [selectedDate, setSelectedDate] = useState(initialDate);
@@ -37,14 +35,14 @@ export default function LogMissedDayScreen() {
               icon={Phosphor.XIcon}
               size={24}
               weight="regular"
-              className="text-screen-light" // always light
+              className="text-screen-light"
             />
           </View>
         </Pressable>
       ),
       headerTitle: () => (
         <Text
-          style={{ fontFamily: "LibreBaskerville_700Bold", fontSize: 24 }}
+          style={{ fontFamily: "LibreBaskerville_700Bold", fontSize: 20 }}
           className="text-text-primary-light dark:text-text-primary-dark"
         >
           Missed a day?
@@ -87,12 +85,11 @@ export default function LogMissedDayScreen() {
           value={selectedDate}
           mode="date"
           display="inline"
-          minimumDate={accountStart}
+          minimumDate={accountStartDay}
           maximumDate={today}
           onChange={(_, date) => {
             if (date) {
-              date.setHours(0, 0, 0, 0);
-              setSelectedDate(date);
+              setSelectedDate(startOfDay(date));
             }
           }}
           accentColor="#6367FF"

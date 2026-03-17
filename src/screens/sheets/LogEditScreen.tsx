@@ -50,7 +50,7 @@ export default function LogEditScreen() {
       ),
       headerTitle: () => (
         <Text
-          style={{ fontFamily: "LibreBaskerville_700Bold", fontSize: 24 }}
+          style={{ fontFamily: "LibreBaskerville_700Bold", fontSize: 20 }}
           className="text-text-primary-light dark:text-text-primary-dark"
         >
           Edit Log

@@ -79,7 +79,7 @@ export default function HistoryScreen() {
       headerShadowVisible: false,
       headerTitle: () => (
         <Text
-          style={{ fontFamily: "LibreBaskerville_700Bold", fontSize: 24 }}
+          style={{ fontFamily: "LibreBaskerville_700Bold", fontSize: 20 }}
           className="text-text-primary-light dark:text-text-primary-dark"
         >
           History

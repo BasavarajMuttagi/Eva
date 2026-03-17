@@ -105,9 +105,9 @@ function Donut({
             style={{
               fontSize: large ? 26 : 15,
               fontWeight: "700",
-              color: "#F0F0F0",
               lineHeight: large ? 30 : 18,
             }}
+            className="text-text-primary-light dark:text-text-primary-dark"
           >
             {Math.round(actual)}
           </Text>
@@ -116,28 +116,28 @@ function Donut({
             style={{
               height: 1,
               width: large ? 32 : 20,
-              backgroundColor: "#F0F0F0",
-              opacity: 0.25,
               marginVertical: large ? 2 : 1,
             }}
+            className="bg-border-light dark:bg-border-dark opacity-40"
           />
 
+          {/* removed ~ here */}
           <Text
             style={{
               fontSize: large ? 15 : 10,
-              color: "#888888",
               lineHeight: large ? 18 : 12,
             }}
+            className="text-text-secondary-light dark:text-text-secondary-dark"
           >
-            ~{Math.round(target)}
+            {Math.round(target)}
           </Text>
 
           <Text
             style={{
               fontSize: large ? 11 : 9,
-              color: "#888888",
               marginTop: large ? 2 : 1,
             }}
+            className="text-text-secondary-light dark:text-text-secondary-dark"
           >
             {unit}
           </Text>
@@ -148,8 +148,8 @@ function Donut({
         style={{
           fontSize: large ? 15 : 12,
           fontWeight: "600",
-          color: "#F0F0F0",
         }}
+        className="text-text-primary-light dark:text-text-primary-dark"
       >
         {label}
       </Text>
@@ -182,7 +182,7 @@ export default function NutritionScreen() {
   }, []);
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#111111" }}>
+    <View className="flex-1 bg-screen-light dark:bg-screen-dark">
       {/* Drag handle */}
       <View style={{ alignItems: "center", paddingTop: 14, paddingBottom: 2 }}>
         <View
@@ -190,8 +190,8 @@ export default function NutritionScreen() {
             width: 36,
             height: 4,
             borderRadius: 2,
-            backgroundColor: "#444444",
           }}
+          className="bg-border-light dark:bg-border-dark"
         />
       </View>
 
@@ -209,12 +209,15 @@ export default function NutritionScreen() {
             style={{
               fontFamily: "LibreBaskerville_700Bold",
               fontSize: 24,
-              color: "#F0F0F0",
             }}
+            className="text-text-primary-light dark:text-text-primary-dark"
           >
             Today
           </Text>
-          <Text style={{ fontSize: 13, color: "#888888", marginTop: 4 }}>
+          <Text
+            style={{ fontSize: 13, marginTop: 4 }}
+            className="text-text-secondary-light dark:text-text-secondary-dark"
+          >
             {format(new Date(), "EEE, MMM d")}
           </Text>
         </View>
@@ -274,10 +277,10 @@ export default function NutritionScreen() {
         {/* Eva's note */}
         <View
           style={{
-            backgroundColor: "#252525",
             borderRadius: 14,
             padding: 16,
           }}
+          className="bg-chip-light dark:bg-chip-dark"
         >
           <View
             style={{ flexDirection: "row", gap: 10, alignItems: "flex-start" }}
@@ -293,13 +296,13 @@ export default function NutritionScreen() {
               style={{
                 fontSize: 13,
                 lineHeight: 20,
-                color: "#888888",
                 fontStyle: "italic",
                 flex: 1,
               }}
+              className="text-text-secondary-light dark:text-text-secondary-dark"
             >
-              The ~ next to each target means these are approximate — based on
-              your body data, not a precise prescription.
+              Targets are based on your body data and preferences, and are meant
+              as flexible guidance rather than a strict prescription.
             </Text>
           </View>
         </View>

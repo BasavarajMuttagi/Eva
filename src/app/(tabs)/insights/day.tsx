@@ -1,20 +1,32 @@
+// day.tsx
 import {
   DonutSection,
   NavHeader,
   StatRow,
 } from "@/src/components/insights/shared";
-import { useAccountStart } from "@/src/lib/accountStart";
+import { useAccountStartDay } from "@/src/lib/accountStart";
 import { useInsightsStore } from "@/src/store/InsightsStore";
 import { useLogStore } from "@/src/store/LogStore";
 import { usePreferencesStore } from "@/src/store/PreferencesStore";
-import { addDays, format, isToday, subDays } from "date-fns";
+import {
+  addDays,
+  format,
+  isAfter,
+  isToday,
+  startOfDay,
+  subDays,
+} from "date-fns";
 import { ScrollView, View } from "react-native";
 
 export default function DayScreen() {
   const { logs } = useLogStore();
   const { prefs } = usePreferencesStore();
   const { selectedDate, setSelectedDate } = useInsightsStore();
-  const accountStart = useAccountStart();
+  const rawAccountStartDay = useAccountStartDay();
+
+  // normalize both to start of day – compare by date only
+  const accountStartDay = startOfDay(rawAccountStartDay);
+  const selectedDay = startOfDay(selectedDate);
 
   const targets = {
     calories: prefs?.targetCalories ?? 0,
@@ -23,7 +35,7 @@ export default function DayScreen() {
     fat: prefs?.targetFat ?? 0,
   };
 
-  const dayKey = format(selectedDate, "yyyy-MM-dd");
+  const dayKey = format(selectedDay, "yyyy-MM-dd");
   const dayLogs = logs.filter(
     (l) =>
       format(new Date(l.createdAt), "yyyy-MM-dd") === dayKey &&
@@ -37,8 +49,14 @@ export default function DayScreen() {
     fat: dayLogs.reduce((s, l) => s + l.totalFat, 0),
   };
 
-  const canGoNext = !isToday(selectedDate);
-  const canGoPrev = selectedDate > accountStart;
+  const canGoNext = !isToday(selectedDay);
+  // From accountStartDay (inclusive), nothing previous:
+  // allow prev only if selectedDay is strictly AFTER the accountStartDay
+  const canGoPrev = isAfter(selectedDay, accountStartDay);
+
+  console.log("accountStartDay", accountStartDay);
+  console.log("selectedDay", selectedDay);
+  console.log("canGoPrev", canGoPrev);
 
   return (
     <ScrollView
@@ -48,15 +66,16 @@ export default function DayScreen() {
     >
       <NavHeader
         label={
-          isToday(selectedDate) ? "Today" : format(selectedDate, "EEE, MMM d")
+          isToday(selectedDay) ? "Today" : format(selectedDay, "EEE, MMM d")
         }
         onPrev={() => {
           if (canGoPrev) {
-            setSelectedDate(subDays(selectedDate, 1));
+            setSelectedDate(subDays(selectedDay, 1));
           }
         }}
-        onNext={() => setSelectedDate(addDays(selectedDate, 1))}
+        onNext={() => setSelectedDate(addDays(selectedDay, 1))}
         canGoNext={canGoNext}
+        canGoPrev={canGoPrev}
       />
 
       <DonutSection

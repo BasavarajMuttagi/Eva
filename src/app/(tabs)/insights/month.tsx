@@ -1,5 +1,6 @@
+// month.tsx
 import { NavHeader, StatRow } from "@/src/components/insights/shared";
-import { useAccountStart } from "@/src/lib/accountStart";
+import { useAccountStartDay } from "@/src/lib/accountStart";
 import { useInsightsStore } from "@/src/store/InsightsStore";
 import { useLogStore } from "@/src/store/LogStore";
 import {
@@ -10,6 +11,7 @@ import {
   format,
   isSameMonth,
   isToday,
+  startOfDay,
   startOfMonth,
   startOfWeek,
   subMonths,
@@ -24,12 +26,12 @@ function ConsistencyCalendar({
   month,
   loggedDays,
   onDayPress,
-  accountStart,
+  accountStartDay,
 }: {
   month: Date;
   loggedDays: Set<string>;
   onDayPress: (date: Date) => void;
-  accountStart: Date;
+  accountStartDay: Date;
 }) {
   const start = startOfMonth(month);
   const end = endOfMonth(month);
@@ -60,16 +62,21 @@ function ConsistencyCalendar({
           const inMonth = isSameMonth(day, month);
           const logged = loggedDays.has(key);
           const todayDay = isToday(day);
-          const future = day > new Date();
-          const beforeStart = day < accountStart;
+          const beforeStart = day < accountStartDay;
+
+          // Only logged days open Day tab
+          const tappable = logged;
+          // Dim ONLY unlogged off‑month / pre‑account days
+          const visuallyDisabled = !logged && (!inMonth || beforeStart);
 
           return (
             <Pressable
               key={key}
               onPress={() => {
-                if (logged && !beforeStart) onDayPress(day);
+                if (tappable) onDayPress(day);
               }}
               style={{ width: "14.28%", alignItems: "center", marginBottom: 6 }}
+              disabled={!tappable}
             >
               <View
                 style={{
@@ -81,7 +88,7 @@ function ConsistencyCalendar({
                   backgroundColor: logged ? "#6367FF" : "transparent",
                   borderWidth: todayDay && !logged ? 1.5 : 0,
                   borderColor: "#6367FF",
-                  opacity: !inMonth || future || beforeStart ? 0.2 : 1,
+                  opacity: visuallyDisabled ? 0.2 : 1,
                 }}
               >
                 <Text
@@ -110,13 +117,14 @@ export default function MonthScreen() {
   const { logs } = useLogStore();
   const { selectedMonth, setSelectedMonth, setSelectedDate, setSelectedWeek } =
     useInsightsStore();
-  const accountStart = useAccountStart();
+  const rawAccountStartDay = useAccountStartDay();
+  const accountStartDay = startOfDay(rawAccountStartDay);
 
   useLayoutEffect(() => {
     navigation.setOptions({
       headerTitle: () => (
         <Text
-          style={{ fontFamily: "LibreBaskerville_700Bold", fontSize: 24 }}
+          style={{ fontFamily: "LibreBaskerville_700Bold", fontSize: 20 }}
           className="text-text-primary-light dark:text-text-primary-dark"
         >
           Insights
@@ -130,6 +138,7 @@ export default function MonthScreen() {
   const monthEnd = endOfMonth(selectedMonth);
   const daysInMonth = monthEnd.getDate();
 
+  // Only done logs in this month
   const monthLogs = logs.filter(
     (l) =>
       new Date(l.createdAt) >= monthStart &&
@@ -137,6 +146,7 @@ export default function MonthScreen() {
       l.state === "done",
   );
 
+  // Days that have at least one done log
   const loggedDaysSet = new Set(
     monthLogs.map((l) => format(new Date(l.createdAt), "yyyy-MM-dd")),
   );
@@ -153,12 +163,11 @@ export default function MonthScreen() {
   const mostEaten =
     topFood !== "—" ? topFood.charAt(0).toUpperCase() + topFood.slice(1) : "—";
 
+  // Stop at the month that contains accountStartDay
   const canGoNext = !isSameMonth(selectedMonth, new Date());
-  const canGoPrev = !isSameMonth(selectedMonth, accountStart);
+  const canGoPrev = !isSameMonth(selectedMonth, accountStartDay);
 
   const handleDayPress = (date: Date) => {
-    // Sync both selectedDate and selectedWeek so Day and Week tabs
-    // are on the right period when navigated to
     setSelectedDate(date);
     setSelectedWeek(date);
     router.push("/(tabs)/insights/day");
@@ -179,13 +188,14 @@ export default function MonthScreen() {
         }}
         onNext={() => setSelectedMonth(addMonths(selectedMonth, 1))}
         canGoNext={canGoNext}
+        canGoPrev={canGoPrev}
       />
 
       <ConsistencyCalendar
         month={selectedMonth}
         loggedDays={loggedDaysSet}
         onDayPress={handleDayPress}
-        accountStart={accountStart}
+        accountStartDay={accountStartDay}
       />
 
       <View className="bg-chip-light dark:bg-chip-dark rounded-2xl px-4 mt-6">

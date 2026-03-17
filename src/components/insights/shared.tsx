@@ -114,7 +114,7 @@ export function Donut({
               lineHeight: large ? 18 : 12,
             }}
           >
-            ~{Math.round(target)}
+            {Math.round(target)}
           </Text>
           <Text
             style={{
@@ -218,43 +218,61 @@ export function NavHeader({
   onPrev,
   onNext,
   canGoNext,
+  canGoPrev,
 }: {
   label: string;
   onPrev: () => void;
   onNext: () => void;
   canGoNext: boolean;
+  canGoPrev: boolean;
 }) {
   return (
     <View className="flex-row items-center justify-between mb-6">
       <Pressable
-        onPress={onPrev}
+        onPress={() => {
+          if (canGoPrev) onPrev();
+        }}
         className="bg-chip-light dark:bg-chip-dark p-2 rounded-full"
-        style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+        style={({ pressed }) => ({
+          opacity: canGoPrev ? (pressed ? 0.6 : 1) : 0.25, // stronger fade when disabled
+        })}
+        disabled={!canGoPrev}
       >
         <Icon
           icon={Phosphor.CaretLeftIcon}
           size={16}
           weight="bold"
-          className="text-text-primary-light dark:text-text-primary-dark"
+          className={
+            canGoPrev
+              ? "text-text-primary-light dark:text-text-primary-dark"
+              : "text-gray-400 dark:text-gray-500" // clearer disabled gray
+          }
         />
       </Pressable>
+
       <Text className="text-text-primary-light dark:text-text-primary-dark font-semibold text-base">
         {label}
       </Text>
+
       <Pressable
         onPress={() => {
           if (canGoNext) onNext();
         }}
         className="bg-chip-light dark:bg-chip-dark p-2 rounded-full"
         style={({ pressed }) => ({
-          opacity: canGoNext ? (pressed ? 0.6 : 1) : 0.3,
+          opacity: canGoNext ? (pressed ? 0.6 : 1) : 0.25,
         })}
+        disabled={!canGoNext}
       >
         <Icon
           icon={Phosphor.CaretRightIcon}
           size={16}
           weight="bold"
-          className="text-text-primary-light dark:text-text-primary-dark"
+          className={
+            canGoNext
+              ? "text-text-primary-light dark:text-text-primary-dark"
+              : "text-gray-400 dark:text-gray-500"
+          }
         />
       </Pressable>
     </View>
