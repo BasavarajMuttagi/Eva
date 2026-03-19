@@ -7,6 +7,7 @@ import { useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
   Alert,
+  Image,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -68,6 +69,7 @@ export default function SettingsScreen() {
   const { data: session, refetch } = authClient.useSession();
   const name = session?.user?.name;
   const email = session?.user?.email;
+  const image = session?.user.image;
   const { sync, clear } = useLogStore();
 
   const [refreshing, setRefreshing] = useState(false);
@@ -89,12 +91,16 @@ export default function SettingsScreen() {
       {/* Profile card */}
       <View className="mb-8 items-center">
         <View className="w-16 h-16 bg-chip-light dark:bg-chip-dark rounded-full items-center justify-center">
-          <Icon
-            icon={Phosphor.UserIcon}
-            size={28}
-            weight="fill"
-            className="text-accent-light dark:text-accent-dark"
-          />
+          {image ? (
+            <Image src={image} className="w-full h-full" />
+          ) : (
+            <Icon
+              icon={Phosphor.UserIcon}
+              size={28}
+              weight="fill"
+              className="text-accent-light dark:text-accent-dark"
+            />
+          )}
         </View>
         <Text className="text-text-primary-light dark:text-text-primary-dark text-base font-semibold mt-3">
           {name}

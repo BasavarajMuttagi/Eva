@@ -31,15 +31,19 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       "expo-splash-screen",
       {
-        image: "./assets/images/splash-icon.png",
+        image: "./assets/images/logo-light.png",
         imageWidth: 200,
         resizeMode: "contain",
-        backgroundColor: "#ffffff",
+        backgroundColor: "#FFF4FF",
         dark: {
-          backgroundColor: "#000000",
+          image: "./assets/images/logo-dark.png",
+          imageWidth: 200,
+          resizeMode: "contain",
+          backgroundColor: "#111111",
         },
       },
     ],
+
     "expo-font",
     "expo-secure-store",
     "@react-native-community/datetimepicker",

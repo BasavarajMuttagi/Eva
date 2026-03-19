@@ -129,24 +129,9 @@ export default function SocialSignIn() {
           }}
         >
           <Image
-            source={require("@/assets/images/icon.png")}
-            className="w-28 h-28"
+            source={require("@/assets/images/logo-light.png")}
+            className="w-56 h-56"
           />
-
-          <View style={{ alignItems: "center" }}>
-            <Text
-              style={{
-                fontFamily: "LibreBaskerville_700Bold",
-                letterSpacing: -1,
-              }}
-              className="text-5xl text-text-primary-light"
-            >
-              Eva
-            </Text>
-            <Text className="text-base text-card-dark/80 text-center">
-              Just you, remembered.
-            </Text>
-          </View>
         </View>
 
         {/* Bottom: CTA */}

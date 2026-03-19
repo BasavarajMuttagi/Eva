@@ -1,4 +1,4 @@
-import SocialSignIn from "@/src/components/SocialSignIn";
+import SocialSignIn from "@/src/screens/SocialSignIn";
 import React from "react";
 
 export default function GoogleSignIn() {

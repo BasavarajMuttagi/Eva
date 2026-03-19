@@ -4,15 +4,14 @@ import { authClient } from "@/src/lib/auth-client";
 import { useOnboardingData } from "@/src/store/OnboardingData";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import { cssInterop } from "nativewind";
-import React, { useState } from "react";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
-
-cssInterop(Image, {
-  className: {
-    target: "style",
-  },
-});
+import { useState } from "react";
+import {
+  ActivityIndicator,
+  Pressable,
+  Text,
+  useColorScheme,
+  View,
+} from "react-native";
 
 export default function EvasReadyScreen() {
   const router = useRouter();
@@ -21,6 +20,12 @@ export default function EvasReadyScreen() {
     useOnboardingData();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const colorScheme = useColorScheme();
+
+  const logoSource =
+    colorScheme === "dark"
+      ? require("@/assets/images/logo-dark.png")
+      : require("@/assets/images/logo-light.png");
 
   const handleBack = () => {
     router.back();
@@ -68,25 +73,15 @@ export default function EvasReadyScreen() {
 
       {/* Main content fully centered */}
       <View className="flex-1 items-center justify-center gap-6">
-        <Image
-          source={require("@/assets/images/icon.png")}
-          className="w-28 h-28"
-        />
-
-        {/* Text block */}
         <View className="items-center gap-3 px-2">
-          <Text
-            style={{
-              fontFamily: "LibreBaskerville_700Bold",
-              letterSpacing: -1,
-            }}
-            className="text-4xl text-text-primary-light dark:text-text-primary-dark text-center"
-          >
-            Eva&apos;s ready.
-          </Text>
+          <Image
+            source={logoSource}
+            className="w-56 h-56"
+            contentFit="contain"
+          />
           <Text className="text-base leading-6 text-text-secondary-light dark:text-text-secondary-dark text-center">
-            Now just tell Eva what you ate today.{"\n"}
-            She&apos;ll take care of the rest.
+            You're all set. Start logging and Eva{"\n"}
+            will take it from here.
           </Text>
           {error && (
             <Text className="text-sm text-danger-light dark:text-danger-dark text-center">
@@ -100,19 +95,19 @@ export default function EvasReadyScreen() {
       <Pressable
         onPress={handleStart}
         disabled={loading}
-        style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+        style={({ pressed }) => ({ opacity: pressed && !loading ? 0.7 : 1 })}
         className={`flex-row items-center rounded-2xl py-4 px-6 ${
           loading
-            ? "bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark"
-            : "bg-accent-light dark:bg-accent-dark"
+            ? "bg-card-light dark:bg-card-dark border-border-light dark:border-border-dark"
+            : "bg-accent-light dark:bg-accent-dark border-transparent"
         }`}
       >
         {loading ? (
-          <ActivityIndicator className="flex-1" />
+          <ActivityIndicator size="small" color="#6367FF" className="flex-1" />
         ) : (
           <>
             <Text className="text-[15px] font-semibold text-screen-light flex-1 text-center">
-              Start journaling
+              Start tracking
             </Text>
             <Icon
               icon={Phosphor.ArrowRightIcon}

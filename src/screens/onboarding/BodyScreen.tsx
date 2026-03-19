@@ -103,7 +103,7 @@ export default function BodyScreen() {
             Tell me a little{"\n"}about you.
           </Text>
           <Text className="mt-4 text-base leading-6 text-text-secondary-light dark:text-text-secondary-dark">
-            This helps Eva understand your body,{"\n"}not judge it.
+            This helps Eva understand your body
           </Text>
         </View>
 
