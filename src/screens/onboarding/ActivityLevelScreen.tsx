@@ -117,9 +117,9 @@ export default function ActivityLevelScreen() {
       <Pressable
         onPress={handleContinue}
         style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-        className="flex-row items-center bg-accent-light dark:bg-accent-dark rounded-2xl py-4 px-5"
+        className="flex-row items-center bg-accent-light dark:bg-accent-dark rounded-2xl py-4 px-6"
       >
-        <Text className="text-[15px] font-semibold text-screen-light flex-1 text-center">
+        <Text className="text-sm font-semibold text-screen-light flex-1 text-center">
           Continue
         </Text>
         <Icon

@@ -70,7 +70,7 @@ export default function BodyScreen() {
       behavior="padding"
     >
       <ScrollView
-        className="flex-1 px-8 pt-16"
+        className="flex-1 px-6 pt-16"
         contentContainerStyle={{ paddingBottom: 24 }}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -228,14 +228,14 @@ export default function BodyScreen() {
           onPress={handleContinue}
           disabled={isDisabled}
           style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-          className={`flex-row items-center rounded-2xl py-4 px-5 ${
+          className={`flex-row items-center rounded-2xl py-4 px-6 ${
             isDisabled
-              ? "bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark"
+              ? "bg-chip-light dark:bg-card-dark"
               : "bg-accent-light dark:bg-accent-dark"
           }`}
         >
           <Text
-            className={`text-[15px] font-semibold flex-1 text-center ${
+            className={`text-sm font-semibold flex-1 text-center ${
               isDisabled
                 ? "text-text-secondary-light dark:text-text-secondary-dark"
                 : "text-screen-light"

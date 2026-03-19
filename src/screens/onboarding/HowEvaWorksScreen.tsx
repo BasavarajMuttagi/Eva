@@ -15,7 +15,7 @@ export default function HowEvaWorksScreen() {
   };
 
   return (
-    <View className="flex-1 bg-screen-light dark:bg-screen-dark px-8 pt-16 pb-10">
+    <View className="flex-1 bg-screen-light dark:bg-screen-dark px-6 pt-16 pb-10">
       {/* Top bar: chip back button */}
       <View className="flex-row items-center justify-between mb-8">
         <Pressable
@@ -114,7 +114,7 @@ export default function HowEvaWorksScreen() {
         style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
         className="flex-row items-center bg-accent-light dark:bg-accent-dark rounded-2xl py-4 px-6"
       >
-        <Text className="text-[15px] font-semibold text-screen-light flex-1 text-center">
+        <Text className="text-sm font-semibold text-screen-light flex-1 text-center">
           Got it
         </Text>
         <Icon

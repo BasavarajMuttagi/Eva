@@ -18,7 +18,7 @@ export default function WelcomeScreen() {
       : require("@/assets/images/logo-light.png");
 
   return (
-    <View className="flex-1 bg-screen-light dark:bg-screen-dark px-8 pt-16 pb-10">
+    <View className="flex-1 bg-screen-light dark:bg-screen-dark px-6 pt-16 pb-10">
       {/* Center content */}
       <View className="flex-1 items-center justify-center gap-6">
         <Image source={logoSource} className="w-56 h-56" contentFit="contain" />
@@ -30,7 +30,7 @@ export default function WelcomeScreen() {
         style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
         className="flex-row items-center bg-accent-light dark:bg-accent-dark rounded-2xl py-4 px-6"
       >
-        <Text className="text-[15px] font-semibold text-screen-light flex-1 text-center">
+        <Text className="text-sm font-semibold text-screen-light flex-1 text-center">
           Get started
         </Text>
         <Icon
