@@ -54,6 +54,20 @@ function RootNavigator() {
               },
             }}
           />
+          <Stack.Screen
+            name="voice"
+            options={{
+              headerShown: true,
+              headerShadowVisible: false,
+              presentation: "formSheet",
+              animation: "slide_from_bottom",
+              sheetAllowedDetents: [0.5],
+              sheetCornerRadius: 30,
+              contentStyle: {
+                height: "100%",
+              },
+            }}
+          />
         </Stack.Protected>
         <Stack.Protected guard={!isLoggedIn}>
           <Stack.Screen name="(auth)" />
