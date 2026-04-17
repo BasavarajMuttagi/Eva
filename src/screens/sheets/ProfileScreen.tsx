@@ -49,14 +49,6 @@ const ACTIVITY_LABELS: Record<(typeof ACTIVITY_VALUES)[number], string> = {
   very_active: "Very Active",
 };
 
-type Prefs = {
-  heightCm: number;
-  weightKg: number;
-  age: number;
-  gender: (typeof GENDER_VALUES)[number];
-  activityLevel: (typeof ACTIVITY_VALUES)[number];
-};
-
 export default function ProfileScreen() {
   const router = useRouter();
   const navigation = useNavigation();
@@ -65,7 +57,6 @@ export default function ProfileScreen() {
   const name = session?.user?.name;
   const email = session?.user?.email;
 
-  const [prefs, setPrefs] = useState<Prefs | null>(null);
   const [saving, setSaving] = useState(false);
 
   const {
@@ -166,7 +157,6 @@ export default function ProfileScreen() {
     apiClient
       .get("/api/preferences")
       .then((res) => {
-        setPrefs(res.data);
         reset({
           heightCm: String(res.data.heightCm),
           weightKg: String(res.data.weightKg),

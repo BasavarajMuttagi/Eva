@@ -1,7 +1,6 @@
 import Icon, { Phosphor } from "@/src/components/Icon";
 import { Image } from "expo-image";
 import { MeshGradientView } from "expo-mesh-gradient";
-import { useRouter } from "expo-router";
 import { cssInterop } from "nativewind";
 import React, { useEffect, useRef, useState } from "react";
 import { Pressable, Text, View } from "react-native";
@@ -63,8 +62,6 @@ function getPoints(t: number): number[][] {
 }
 
 export default function SocialSignIn() {
-  const router = useRouter();
-
   const [points, setPoints] = useState<number[][]>(getPoints(0));
   const [colors, setColors] = useState<string[]>(getColors(0));
   const frameRef = useRef<ReturnType<typeof setInterval> | null>(null);

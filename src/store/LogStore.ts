@@ -48,7 +48,6 @@ export type FoodLog = {
 
 type LogStore = {
   logs: FoodLog[];
-  since: number | null;
   hasMore: boolean;
   syncing: boolean;
 
@@ -70,7 +69,6 @@ type LogStore = {
 
 export const useLogStore = create<LogStore>((set, get) => ({
   logs: [],
-  since: null,
   hasMore: true,
   syncing: false,
 
@@ -90,7 +88,6 @@ export const useLogStore = create<LogStore>((set, get) => ({
         );
         return {
           logs: [...localProcessing, ...incoming],
-          since,
           syncing: false,
         };
       });
@@ -132,7 +129,6 @@ export const useLogStore = create<LogStore>((set, get) => ({
   clear: () =>
     set({
       logs: [],
-      since: null,
       hasMore: true,
       syncing: false,
     }),

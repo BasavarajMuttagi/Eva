@@ -1,6 +1,5 @@
 import Icon, { Phosphor } from "@/src/components/Icon";
 import { SignOutButton } from "@/src/components/SignOutButton";
-import { apiClient } from "@/src/lib/apiClient";
 import { authClient } from "@/src/lib/auth-client";
 import { useLogStore } from "@/src/store/LogStore";
 import { useRouter } from "expo-router";
@@ -14,8 +13,6 @@ import {
   Text,
   View,
 } from "react-native";
-import { useOnboardingData } from "../store/OnboardingData";
-import { usePreferencesStore } from "../store/PreferencesStore";
 
 type SettingsRowProps = {
   icon: Phosphor.Icon;
@@ -66,7 +63,7 @@ function SettingsRow({
 
 export default function SettingsScreen() {
   const router = useRouter();
-  const { data: session, refetch } = authClient.useSession();
+  const { data: session } = authClient.useSession();
   const name = session?.user?.name;
   const email = session?.user?.email;
   const image = session?.user.image;
@@ -159,32 +156,6 @@ export default function SettingsScreen() {
         Danger zone
       </Text>
       <View>
-        <SettingsRow
-          icon={Phosphor.ArrowCounterClockwiseIcon}
-          iconBg="#FFE4E4"
-          iconColor="text-danger-light dark:text-danger-dark"
-          label="Reset onboarding"
-          onPress={async () => {
-            Alert.alert(
-              "Reset onboarding?",
-              "This will clear your profile and preferences.",
-              [
-                { text: "Cancel", style: "cancel" },
-                {
-                  text: "Reset",
-                  style: "destructive",
-                  onPress: async () => {
-                    await apiClient.post("/api/onboarding/reset");
-                    useOnboardingData.getState().reset();
-                    usePreferencesStore.getState().clear();
-                    await refetch();
-                  },
-                },
-              ],
-            );
-          }}
-          destructive
-        />
         <SettingsRow
           icon={Phosphor.TrashIcon}
           iconBg="#FFE4E4"

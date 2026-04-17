@@ -265,14 +265,19 @@ export function LogList({
     await addLog(id, rawText, userId, createdAtIso);
   };
 
+  const openSavedMealPicker = () => {
+    setInput("");
+    router.push({
+      pathname: "/(sheets)/saved-meal-picker",
+      params: { date: format(date, "yyyy-MM-dd") },
+    });
+  };
+
   const handleAdd = async () => {
     const trimmed = input.trim();
     if (!trimmed) return;
     if (isSlashOnly) {
-      router.push({
-        pathname: "/(sheets)/saved-meal-picker",
-        params: { date: format(date, "yyyy-MM-dd") },
-      });
+      openSavedMealPicker();
       return;
     }
     await addRawTextAsLog(trimmed);
@@ -307,14 +312,9 @@ export function LogList({
         <TextInput
           value={input}
           onChangeText={(text) => {
-            // If user types "/" as the first non-space char, open picker sheet.
             const next = text.trimStart();
             if (next === "/") {
-              setInput("");
-              router.push({
-                pathname: "/(sheets)/saved-meal-picker",
-                params: { date: format(date, "yyyy-MM-dd") },
-              });
+              openSavedMealPicker();
               return;
             }
             setInput(text);
