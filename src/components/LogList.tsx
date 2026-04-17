@@ -223,6 +223,7 @@ export function LogList({
     router.push({
       pathname: "/(sheets)/nutrition",
       params: {
+        date: format(date, "yyyy-MM-dd"),
         actualCalories: actual.calories,
         actualProtein: actual.protein,
         actualCarbs: actual.carbs,

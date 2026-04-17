@@ -1,7 +1,8 @@
 import Icon, { Phosphor } from "@/src/components/Icon";
-import { format } from "date-fns";
+import { parseDateParamToLocalDay } from "@/src/lib/logDate";
+import { format, isToday, isYesterday } from "date-fns";
 import { useLocalSearchParams, useNavigation } from "expo-router";
-import { useEffect, useLayoutEffect } from "react";
+import { useEffect, useLayoutEffect, useMemo } from "react";
 import { ScrollView, Text, View } from "react-native";
 import Animated, {
   Easing,
@@ -162,6 +163,17 @@ function Donut({
 export default function NutritionScreen() {
   const navigation = useNavigation();
   const params = useLocalSearchParams();
+  const dateParam = Array.isArray(params.date) ? params.date[0] : params.date;
+  const selectedDay = useMemo(
+    () => parseDateParamToLocalDay(dateParam),
+    [dateParam],
+  );
+
+  const title = isToday(selectedDay)
+    ? "Today"
+    : isYesterday(selectedDay)
+      ? "Yesterday"
+      : format(selectedDay, "EEE, MMM d");
 
   const actual = {
     calories: safeNum(params.actualCalories),
@@ -212,13 +224,13 @@ export default function NutritionScreen() {
             }}
             className="text-text-primary-light dark:text-text-primary-dark"
           >
-            Today
+            {title}
           </Text>
           <Text
             style={{ fontSize: 13, marginTop: 4 }}
             className="text-text-secondary-light dark:text-text-secondary-dark"
           >
-            {format(new Date(), "EEE, MMM d")}
+            {format(selectedDay, "EEE, MMM d")}
           </Text>
         </View>
 
