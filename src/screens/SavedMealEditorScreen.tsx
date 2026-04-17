@@ -3,7 +3,7 @@ import { authClient } from "@/src/lib/auth-client";
 import { useSavedMealStore } from "@/src/store/SavedMealStore";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
-import { Alert, Pressable, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, Alert, Pressable, Text, TextInput, View } from "react-native";
 
 export default function SavedMealEditorScreen() {
   const router = useRouter();
@@ -122,12 +122,16 @@ export default function SavedMealEditorScreen() {
           }`}
         >
           <View pointerEvents="none">
-            <Icon
-              icon={saving ? Phosphor.CircleNotchIcon : Phosphor.CheckIcon}
-              size={22}
-              weight="bold"
-              className="text-screen-light"
-            />
+            {saving ? (
+              <ActivityIndicator size={22} color="#FFFFFF" />
+            ) : (
+              <Icon
+                icon={Phosphor.CheckIcon}
+                size={22}
+                weight="bold"
+                className="text-screen-light"
+              />
+            )}
           </View>
         </Pressable>
       ),

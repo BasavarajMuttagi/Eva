@@ -2,7 +2,7 @@ import Icon, { Phosphor } from "@/src/components/Icon";
 import { useLogStore } from "@/src/store/LogStore";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useCallback, useLayoutEffect, useState } from "react";
-import { Pressable, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, Pressable, Text, TextInput, View } from "react-native";
 
 export default function LogEditScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -64,12 +64,7 @@ export default function LogEditScreen() {
         >
           <View pointerEvents="none">
             {saving ? (
-              <Icon
-                icon={Phosphor.CircleNotchIcon}
-                size={24}
-                weight="regular"
-                className="text-screen-light animate-spin"
-              />
+              <ActivityIndicator size={24} color="#FFFFFF" />
             ) : (
               <Icon
                 icon={Phosphor.CheckIcon}

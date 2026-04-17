@@ -7,6 +7,7 @@ import { useNavigation, useRouter } from "expo-router";
 import React, { useEffect, useLayoutEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
+  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Pressable,
@@ -130,12 +131,7 @@ export default function ProfileScreen() {
         >
           <View pointerEvents="none">
             {saving ? (
-              <Icon
-                icon={Phosphor.CircleNotchIcon}
-                size={24}
-                weight="regular"
-                className="text-screen-light"
-              />
+              <ActivityIndicator size={24} color="#FFFFFF" />
             ) : (
               <Icon
                 icon={Phosphor.CheckIcon}
