@@ -2,6 +2,8 @@ import Icon, { Phosphor } from "@/src/components/Icon";
 import { SignOutButton } from "@/src/components/SignOutButton";
 import { authClient } from "@/src/lib/auth-client";
 import { useLogStore } from "@/src/store/LogStore";
+import { usePreferencesStore } from "@/src/store/PreferencesStore";
+import { useSavedMealStore } from "@/src/store/SavedMealStore";
 import { useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
@@ -68,6 +70,8 @@ export default function SettingsScreen() {
   const email = session?.user?.email;
   const image = session?.user.image;
   const { sync, clear } = useLogStore();
+  const clearPrefs = usePreferencesStore((state) => state.clear);
+  const clearSavedMeals = useSavedMealStore((state) => state.clear);
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -172,8 +176,18 @@ export default function SettingsScreen() {
                   text: "Delete account",
                   style: "destructive",
                   onPress: async () => {
-                    await authClient.deleteUser();
-                    clear();
+                    try {
+                      await authClient.deleteUser();
+                      clear();
+                      clearPrefs();
+                      clearSavedMeals();
+                      console.log("[Settings] account deleted successfully");
+                    } catch {
+                      Alert.alert(
+                        "Failed to delete account",
+                        "Please try again.",
+                      );
+                    }
                   },
                 },
               ],
