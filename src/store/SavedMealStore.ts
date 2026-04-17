@@ -1,4 +1,5 @@
 import { apiClient } from "@/src/lib/apiClient";
+import { parseStoredDate } from "@/src/lib/logDate";
 import "react-native-get-random-values";
 import { v4 as uuidv4 } from "uuid";
 import { create } from "zustand";
@@ -55,14 +56,7 @@ type SavedMealStore = {
 };
 
 function toIso(value: unknown): string {
-  if (typeof value === "string") {
-    const date = new Date(value);
-    if (!Number.isNaN(date.getTime())) return date.toISOString();
-    return new Date().toISOString();
-  }
-  if (typeof value === "number") return new Date(value).toISOString();
-  if (value instanceof Date) return value.toISOString();
-  return new Date().toISOString();
+  return parseStoredDate(value as string | number | Date | undefined | null).toISOString();
 }
 
 function normalizeSavedMeal(log: any): SavedMealLog {

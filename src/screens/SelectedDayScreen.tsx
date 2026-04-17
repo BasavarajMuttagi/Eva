@@ -7,8 +7,7 @@ import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useLayoutEffect, useMemo } from "react";
 import { Pressable, Text, TouchableOpacity, View } from "react-native";
 
-function formatDayTitle(dateStr: string): string {
-  const date = new Date(dateStr);
+function formatDayTitle(date: Date): string {
   if (isYesterday(date)) return "Yesterday";
   return format(date, "EEE, MMM d");
 }
@@ -42,7 +41,7 @@ export default function SelectedDayScreen() {
           style={{ fontFamily: "LibreBaskerville_700Bold", fontSize: 20 }}
           className="text-text-primary-light dark:text-text-primary-dark"
         >
-          {formatDayTitle(format(selectedDay, "yyyy-MM-dd"))}
+          {formatDayTitle(selectedDay)}
         </Text>
       ),
     });

@@ -1,4 +1,4 @@
-import { isValid, parse, parseISO, set } from "date-fns";
+import { format, isValid, parse, parseISO, set } from "date-fns";
 
 export function parseDateParamToLocalDay(dateStr?: string): Date {
   if (!dateStr) return new Date();
@@ -13,4 +13,26 @@ export function parseDateParamToLocalDay(dateStr?: string): Date {
 
 export function buildCreatedAtIsoForDay(day: Date): string {
   return day.toISOString();
+}
+
+export function parseStoredDate(value: string | number | Date | undefined | null): Date {
+  if (value instanceof Date) {
+    return isValid(value) ? value : new Date();
+  }
+
+  if (typeof value === "string") {
+    const parsed = parseISO(value);
+    return isValid(parsed) ? parsed : new Date();
+  }
+
+  if (typeof value === "number") {
+    const parsed = new Date(value);
+    return isValid(parsed) ? parsed : new Date();
+  }
+
+  return new Date();
+}
+
+export function toDayKey(value: string | number | Date): string {
+  return format(parseStoredDate(value), "yyyy-MM-dd");
 }

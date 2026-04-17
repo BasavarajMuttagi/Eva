@@ -2,7 +2,7 @@
 import Icon, { Phosphor } from "@/src/components/Icon";
 import { apiClient } from "@/src/lib/apiClient";
 import { authClient } from "@/src/lib/auth-client";
-import { buildCreatedAtIsoForDay } from "@/src/lib/logDate";
+import { buildCreatedAtIsoForDay, toDayKey } from "@/src/lib/logDate";
 import type { FoodLog } from "@/src/store/LogStore";
 import { useLogStore } from "@/src/store/LogStore";
 import { usePreferencesStore } from "@/src/store/PreferencesStore";
@@ -189,13 +189,10 @@ export function LogList({
   const [input, setInput] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const dateKey = format(date, "yyyy-MM-dd");
+  const dateKey = toDayKey(date);
 
   const dayLogs = useMemo(
-    () =>
-      logs.filter(
-        (l) => format(new Date(l.createdAt), "yyyy-MM-dd") === dateKey,
-      ),
+    () => logs.filter((l) => toDayKey(l.createdAt) === dateKey),
     [logs, dateKey],
   );
 

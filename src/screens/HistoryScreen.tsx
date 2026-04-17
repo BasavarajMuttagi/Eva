@@ -1,4 +1,5 @@
 import Icon, { Phosphor } from "@/src/components/Icon";
+import { parseStoredDate, toDayKey } from "@/src/lib/logDate";
 import { useLogStore, type FoodLog } from "@/src/store/LogStore";
 import { format, isToday, isYesterday } from "date-fns";
 import { useNavigation, useRouter } from "expo-router";
@@ -14,7 +15,7 @@ type DayGroup = {
 };
 
 function formatTitle(dateStr: string): string {
-  const date = new Date(dateStr);
+  const date = parseStoredDate(dateStr);
   if (isYesterday(date)) return "Yesterday";
   return format(date, "EEE, MMM d");
 }
@@ -107,8 +108,9 @@ export default function HistoryScreen() {
     const groups: Record<string, FoodLog[]> = {};
 
     for (const log of logs) {
-      if (isToday(new Date(log.createdAt))) continue;
-      const key = format(new Date(log.createdAt), "yyyy-MM-dd");
+      const createdAt = parseStoredDate(log.createdAt);
+      if (isToday(createdAt)) continue;
+      const key = toDayKey(createdAt);
       if (!groups[key]) groups[key] = [];
       groups[key].push(log);
     }
