@@ -1,9 +1,10 @@
 import Icon, { Phosphor } from "@/src/components/Icon";
 import { LogList } from "@/src/components/LogList";
+import { parseDateParamToLocalDay } from "@/src/lib/logDate";
 import { Ionicons } from "@expo/vector-icons";
 import { format, isYesterday } from "date-fns";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import { useLayoutEffect } from "react";
+import { useLayoutEffect, useMemo } from "react";
 import { Pressable, Text, TouchableOpacity, View } from "react-native";
 
 function formatDayTitle(dateStr: string): string {
@@ -16,6 +17,7 @@ export default function SelectedDayScreen() {
   const { date } = useLocalSearchParams<{ date: string }>();
   const navigation = useNavigation();
   const router = useRouter();
+  const selectedDay = useMemo(() => parseDateParamToLocalDay(date), [date]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -40,16 +42,16 @@ export default function SelectedDayScreen() {
           style={{ fontFamily: "LibreBaskerville_700Bold", fontSize: 20 }}
           className="text-text-primary-light dark:text-text-primary-dark"
         >
-          {formatDayTitle(date)}
+          {formatDayTitle(format(selectedDay, "yyyy-MM-dd"))}
         </Text>
       ),
     });
-  }, [navigation, router, date]);
+  }, [navigation, router, selectedDay]);
 
   return (
     <View className="flex-1">
       <LogList
-        date={new Date(date)}
+        date={selectedDay}
         emptyTitle="Nothing logged"
         emptySubtitle="No entries found for this day"
       />
@@ -58,7 +60,7 @@ export default function SelectedDayScreen() {
         onPress={() =>
           router.push({
             pathname: "/voice",
-            params: { date },
+            params: { date: format(selectedDay, "yyyy-MM-dd") },
           })
         }
         activeOpacity={0.8}

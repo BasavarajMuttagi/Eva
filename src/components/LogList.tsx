@@ -2,6 +2,7 @@
 import Icon, { Phosphor } from "@/src/components/Icon";
 import { apiClient } from "@/src/lib/apiClient";
 import { authClient } from "@/src/lib/auth-client";
+import { buildCreatedAtIsoForDay } from "@/src/lib/logDate";
 import type { FoodLog } from "@/src/store/LogStore";
 import { useLogStore } from "@/src/store/LogStore";
 import { usePreferencesStore } from "@/src/store/PreferencesStore";
@@ -219,6 +220,7 @@ export function LogList({
   );
 
   const hasAnyDone = dayLogs.some((l) => l.state === "done");
+  const isSlashOnly = input.trim() === "/";
 
   const openNutrition = () => {
     router.push({
@@ -259,11 +261,24 @@ export function LogList({
     });
   }, [hasAnyDone, prefs, actual.calories]);
 
-  const handleAdd = async () => {
-    if (!input.trim()) return;
+  const addRawTextAsLog = async (rawText: string) => {
     const id = uuidv4();
+    const createdAtIso = buildCreatedAtIsoForDay(date);
     setInput("");
-    await addLog(id, input.trim(), userId, date.toISOString());
+    await addLog(id, rawText, userId, createdAtIso);
+  };
+
+  const handleAdd = async () => {
+    const trimmed = input.trim();
+    if (!trimmed) return;
+    if (isSlashOnly) {
+      router.push({
+        pathname: "/(sheets)/saved-meal-picker",
+        params: { date: format(date, "yyyy-MM-dd") },
+      });
+      return;
+    }
+    await addRawTextAsLog(trimmed);
   };
 
   const handleDelete = (logId: string, close?: () => void) => {
@@ -294,7 +309,19 @@ export function LogList({
       <View className="flex-row items-center justify-between">
         <TextInput
           value={input}
-          onChangeText={setInput}
+          onChangeText={(text) => {
+            // If user types "/" as the first non-space char, open picker sheet.
+            const next = text.trimStart();
+            if (next === "/") {
+              setInput("");
+              router.push({
+                pathname: "/(sheets)/saved-meal-picker",
+                params: { date: format(date, "yyyy-MM-dd") },
+              });
+              return;
+            }
+            setInput(text);
+          }}
           placeholder="What did you eat?"
           placeholderTextColor="#6B6B6B"
           className="flex-1 text-lg text-text-primary-light dark:text-text-primary-dark"

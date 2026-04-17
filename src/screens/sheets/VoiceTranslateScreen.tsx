@@ -1,6 +1,10 @@
 import AudioWaveform from "@/src/components/AudioWaveform";
 import Icon, { Phosphor } from "@/src/components/Icon";
 import { authClient } from "@/src/lib/auth-client";
+import {
+  buildCreatedAtIsoForDay,
+  parseDateParamToLocalDay,
+} from "@/src/lib/logDate";
 import { useLiveTranscribe } from "@/src/lib/useSarvamLiveTranslate";
 import { useLogStore } from "@/src/store/LogStore";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -40,12 +44,7 @@ export default function VoiceTranslateScreen() {
   const isClosingRef = useRef(false);
 
   const targetDateIso = useMemo(() => {
-    if (!date) return new Date().toISOString();
-
-    const parsed = new Date(date);
-    return Number.isNaN(parsed.getTime())
-      ? new Date().toISOString()
-      : parsed.toISOString();
+    return buildCreatedAtIsoForDay(parseDateParamToLocalDay(date));
   }, [date]);
 
   useEffect(() => {

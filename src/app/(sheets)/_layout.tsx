@@ -13,6 +13,7 @@ export default function SheetLayout() {
       <Stack.Screen name="search" />
       <Stack.Screen name="nutrition" />
       <Stack.Screen name="saved-meal-detail" />
+      <Stack.Screen name="saved-meal-picker" />
     </Stack>
   );
 }

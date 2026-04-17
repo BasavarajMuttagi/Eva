@@ -63,6 +63,7 @@ type LogStore = {
     userId: string,
     createdAt?: string,
   ) => Promise<void>;
+  addSavedMealLog: (savedMealId: string, createdAt?: string) => Promise<void>;
   retryLog: (id: string) => Promise<void>;
   editLog: (id: string, rawText: string) => Promise<void>;
 };
@@ -172,6 +173,21 @@ export const useLogStore = create<LogStore>((set, get) => ({
         errorMessage: "Failed to process",
       });
     }
+  },
+
+  addSavedMealLog: async (savedMealId, createdAt) => {
+    const now = createdAt ?? new Date().toISOString();
+    const res = await apiClient.post("/api/log/from-saved-meal", {
+      savedMealId,
+      createdAt: now,
+    });
+
+    if (res.data?.log) {
+      get().upsertLog(res.data.log);
+      return;
+    }
+
+    await get().sync();
   },
 
   retryLog: async (id) => {
