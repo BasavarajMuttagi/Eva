@@ -131,6 +131,14 @@ export default function SettingsScreen() {
       </Text>
       <View>
         <SettingsRow
+          icon={Phosphor.BookmarksSimpleIcon}
+          iconBg="#E8E6FA"
+          iconColor="text-accent-light dark:text-accent-dark"
+          label="Saved Meals"
+          subtitle="Create and manage reusable meals"
+          onPress={() => router.push("/saved-meals")}
+        />
+        <SettingsRow
           icon={Phosphor.KeyholeIcon}
           iconBg="#E8E6FA"
           iconColor="text-accent-light dark:text-accent-dark"

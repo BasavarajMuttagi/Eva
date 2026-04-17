@@ -44,6 +44,26 @@ function RootNavigator() {
           <Stack.Screen name="index" />
           <Stack.Screen name="(tabs)" />
           <Stack.Screen
+            name="saved-meals"
+            options={{
+              headerShown: true,
+              headerShadowVisible: false,
+            }}
+          />
+          <Stack.Screen
+            name="saved-meal-editor"
+            options={{
+              headerShown: true,
+              headerShadowVisible: false,
+              presentation: "formSheet",
+              animation: "slide_from_bottom",
+              sheetCornerRadius: 30,
+              contentStyle: {
+                height: "100%",
+              },
+            }}
+          />
+          <Stack.Screen
             name="(sheets)"
             options={{
               presentation: "formSheet",
