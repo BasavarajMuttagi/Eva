@@ -15,7 +15,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   icon: "./assets/images/icon.png",
   scheme: appScheme,
   userInterfaceStyle: "automatic",
-  newArchEnabled: true,
   platforms: ["ios"],
 
   ios: {
@@ -27,6 +26,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
   },
   plugins: [
+    "expo-asset",
+    "expo-image",
+    "expo-web-browser",
     ["expo-file-system"],
     [
       "expo-audio",
