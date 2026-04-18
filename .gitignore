@@ -39,7 +39,10 @@ yarn-error.*
 app-example
 
 # generated native folders
-/ios
+ios/*
+!ios/ci_scripts/
+!ios/ci_scripts/ci_post_clone.sh
+
 /android
 .env
 .env.*
